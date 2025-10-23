@@ -39,7 +39,7 @@ require_once 'includes/header.php';
             <div class="artist-card">
                 <div class="artist-image-placeholder"></div>
                 <div class="card-info">
-                    <h3>Isyana</h3>
+                    <h3>Raisa</h3>
                 </div>
             </div>
             <div class="artist-card">
