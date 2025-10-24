@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/db.php';
+require_once '../includes/db.php';
 
 // Proteksi halaman: Wajib login dan harus ada data pesanan di session
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['last_purchase_ids'])) {
@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['last_purchase_ids'])) {
 }
 
 $page_title = 'Pesanan Berhasil';
-require_once 'includes/header.php';
+require_once '../includes/header.php';
 
 // Ambil ID pesanan dari session
 $purchase_ids = $_SESSION['last_purchase_ids'];
@@ -63,7 +63,7 @@ unset($_SESSION['last_purchase_ids']);
         <div class="next-steps">
             <p>Anda dapat melihat semua tiket yang telah Anda beli di halaman **"Tiket Saya"** pada profil Anda.</p>
             <div class="action-buttons">
-                <a href="index.php" class="btn-secondary">Kembali ke Beranda</a>
+                <a href="/upfm_web/index.php" class="btn-secondary">Kembali ke Beranda</a>
                 <a href="my_tickets.php" class="btn-standard">Lihat Tiket Saya</a>
             </div>
         </div>

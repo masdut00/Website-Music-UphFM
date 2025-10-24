@@ -17,6 +17,6 @@ if (isset($_POST['ticket_id']) && isset($_POST['quantity'])) {
     }
 }
 
-header('Location: keranjang.php');
+header('Location: /upfm_web/account/keranjang.php');
 exit();
 ?>

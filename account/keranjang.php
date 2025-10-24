@@ -1,7 +1,7 @@
 <?php
-require_once 'includes/db.php';
+require_once '../includes/db.php';
 $page_title = 'Keranjang Belanja';
-require_once 'includes/header.php';
+require_once '../includes/header.php';
 
 // Ambil item di keranjang dari session
 $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
@@ -34,7 +34,7 @@ if (!empty($cart_items)) {
     <h1 class="cart-title">Keranjang Anda</h1>
 
     <?php if (!empty($tickets_in_cart)): ?>
-        <form action="proses_checkout.php" method="POST">
+        <form action="/upfm_web/process/proses_checkout.php" method="POST">
             <table class="cart-table">
                 <thead>
                     <tr>
@@ -71,18 +71,18 @@ if (!empty($cart_items)) {
                 </tfoot>
             </table>
             <div class="cart-actions">
-                <a href="explore.php" class="btn-secondary">Lanjut Belanja</a>
+                <a href="/upfm_web/explore.php" class="btn-secondary">Lanjut Belanja</a>
                 <button type="submit" class="btn-checkout">Checkout Sekarang</button>
             </div>
         </form>
     <?php else: ?>
         <div class="cart-empty">
             <p>Keranjang belanja Anda masih kosong.</p>
-            <a href="explore.php" class="btn-standard">Mulai Belanja</a>
+            <a href="/upfm_web/explore.php" class="btn-standard">Mulai Belanja</a>
         </div>
     <?php endif; ?>
 </div>
 
 <?php
-require_once 'includes/footer.php';
+require_once '../includes/footer.php';
 ?>

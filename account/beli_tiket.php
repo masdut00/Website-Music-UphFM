@@ -1,10 +1,13 @@
 <?php
-require_once 'includes/db.php';
+// Pastikan session sudah dimulai jika Anda menggunakannya untuk proteksi
+session_start();
+
+require_once '../includes/db.php';
 
 // Proteksi halaman
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['error_message'] = "Anda harus login untuk melihat detail tiket.";
-    header("Location: login.php");
+    header("Location: /upfm_web/auth/login.php");
     exit();
 }
 
@@ -18,14 +21,14 @@ $stmt->execute();
 $ticket = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// BARU: 2. Ambil semua tipe tiket yang tersedia
-$types_stmt = $conn->prepare("SELECT type_name FROM ticket_types WHERE ticket_id = ? ORDER BY id");
+// 2. Ambil semua tipe tiket yang tersedia (Perlu untuk mendapatkan ID Tipe jika Anda menggunakannya di keranjang)
+$types_stmt = $conn->prepare("SELECT id, type_name FROM ticket_types WHERE ticket_id = ? ORDER BY id");
 $types_stmt->bind_param("i", $ticket_id);
 $types_stmt->execute();
 $ticket_types = $types_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $types_stmt->close();
 
-// BARU: 3. Ambil semua gambar tiket
+// 3. Ambil semua gambar tiket
 $images_stmt = $conn->prepare("SELECT image_url FROM ticket_images WHERE ticket_id = ? LIMIT 4");
 $images_stmt->bind_param("i", $ticket_id);
 $images_stmt->execute();
@@ -33,7 +36,7 @@ $ticket_images = $images_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $images_stmt->close();
 
 $page_title = $ticket ? $ticket['category_name'] : 'Tiket Tidak Ditemukan';
-require_once 'includes/header.php';
+require_once '../includes/header.php';
 ?>
 
 <div class="container page-container">
@@ -58,15 +61,19 @@ require_once 'includes/header.php';
                 <p class="product-description"><?php echo htmlspecialchars($ticket['description'] ?: 'Deskripsi tidak tersedia.'); ?></p>
                 <p class="product-seller">by UpFM</p>
 
-                <form action="tambah_keranjang.php" method="POST">
+                <form action="/upfm_web/process/tambah_keranjang.php" method="POST">
                     <input type="hidden" name="ticket_id" value="<?php echo $ticket_id; ?>">
+                    
+                    <input type="hidden" name="type_name" id="type-name-input" value="<?php echo !empty($ticket_types) ? htmlspecialchars($ticket_types[0]['type_name']) : ''; ?>">
                     
                     <?php if (!empty($ticket_types)): ?>
                         <div class="detail-group">
                             <label>Type</label>
                             <div class="type-selector">
                                 <?php foreach ($ticket_types as $index => $type): ?>
-                                    <button type="button" class="type-btn <?php echo $index === 0 ? 'active' : ''; ?>">
+                                    <button type="button" 
+                                            class="type-btn <?php echo $index === 0 ? 'active' : ''; ?>"
+                                            data-type-name="<?php echo htmlspecialchars($type['type_name']); ?>"> 
                                         <?php echo htmlspecialchars($type['type_name']); ?>
                                     </button>
                                 <?php endforeach; ?>
@@ -94,7 +101,49 @@ require_once 'includes/header.php';
     <?php endif; ?>
 </div>
 
-<?php require_once 'includes/footer.php'; ?>
+<?php require_once '../includes/footer.php'; ?>
+
 <script>
-// ... (kode JavaScript untuk tombol kuantitas dan tipe tidak perlu diubah) ...
+document.addEventListener('DOMContentLoaded', function() {
+    // === Logic untuk Pemilihan Tipe Tiket ===
+    const typeButtons = document.querySelectorAll('.type-btn');
+    const typeInput = document.getElementById('type-name-input');
+
+    if (typeButtons.length > 0) {
+        // Jika ada tipe, pastikan tipe pertama (default) sudah diatur di input hidden (sudah dilakukan di PHP)
+        
+        typeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // 1. Kelola kelas 'active' visual
+                typeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // 2. SET NILAI INPUT HIDDEN untuk dikirim ke server
+                const selectedTypeName = this.getAttribute('data-type-name');
+                typeInput.value = selectedTypeName;
+            });
+        });
+    }
+
+    // === Logic untuk Kuantitas ===
+    const minusBtn = document.getElementById('minus-btn');
+    const plusBtn = document.getElementById('plus-btn');
+    const quantityInput = document.getElementById('quantity-input');
+
+    if (minusBtn && plusBtn && quantityInput) {
+        minusBtn.addEventListener('click', function() {
+            let currentVal = parseInt(quantityInput.value);
+            // Pastikan kuantitas tidak kurang dari 1
+            if (currentVal > 1) {
+                quantityInput.value = currentVal - 1;
+            }
+        });
+
+        plusBtn.addEventListener('click', function() {
+            let currentVal = parseInt(quantityInput.value);
+            // Anda mungkin ingin menambahkan batasan stok di sini, tapi defaultnya cukup tambahkan 1
+            quantityInput.value = currentVal + 1;
+        });
+    }
+});
 </script>

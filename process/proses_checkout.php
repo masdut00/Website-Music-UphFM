@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/db.php'; 
+require_once '../includes/db.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     die("Anda harus login untuk checkout.");
@@ -41,7 +41,7 @@ if (!empty($cart_items)) {
 
     $_SESSION['last_purchase_ids'] = $new_purchase_ids;
 
-    header('Location: pesanan_sukses.php');
+    header('Location: /upfm_web/account/pesanan_sukses.php');
     exit();
 } else {
     header('Location: keranjang.php');
