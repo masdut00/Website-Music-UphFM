@@ -1,9 +1,8 @@
 <?php
 require_once '../includes/db.php';
 
-// Proteksi Halaman: Wajib login
 if (!isset($_SESSION['user_id'])) {
-    // DIUBAH: Path absolut untuk redirect
+
     header("Location: /upfm_web/auth/login.php");
     exit();
 }
@@ -15,9 +14,8 @@ $user_id = $_SESSION['user_id'];
 $message = '';
 $message_type = '';
 
-// BAGIAN 1: HANYA MENANGANI LOGIKA SAAT FORM GANTI PASSWORD DI-SUBMIT
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
-    // (Logika ganti password Anda sudah benar dan tidak perlu diubah)
+
     $current_password = $_POST['current_password'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
@@ -52,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     }
 }
 
-// BAGIAN 2: SELALU AMBIL DATA INI SETIAP KALI HALAMAN DIBUKA
 $history_stmt = $conn->prepare(
     "SELECT t.category_name, p.purchase_date FROM ticket_purchases p JOIN tickets t ON p.ticket_id = t.id WHERE p.user_id = ? ORDER BY p.purchase_date DESC LIMIT 5"
 );

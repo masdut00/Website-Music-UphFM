@@ -3,23 +3,22 @@ require_once '../includes/db.php';
 $page_title = 'Keranjang Belanja';
 require_once '../includes/header.php';
 
-// Ambil item di keranjang dari session
 $cart_items = isset($_SESSION['cart']) ? $_SESSION['cart'] : [];
 $tickets_in_cart = [];
 $grand_total = 0;
 
 if (!empty($cart_items)) {
-    // Ambil semua ID tiket dari keranjang
+
     $ticket_ids = array_keys($cart_items);
     
-    // Siapkan placeholder '?' untuk query IN (...)
+
     $placeholders = implode(',', array_fill(0, count($ticket_ids), '?'));
     
-    // Query untuk mengambil detail semua tiket di keranjang dalam satu kali panggilan
+
     $sql = "SELECT id, category_name, price FROM tickets WHERE id IN ($placeholders)";
     $stmt = $conn->prepare($sql);
     
-    // Bind semua ID tiket ke statement
+
     $stmt->bind_param(str_repeat('i', count($ticket_ids)), ...$ticket_ids);
     $stmt->execute();
     $result = $stmt->get_result();

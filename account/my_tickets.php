@@ -1,7 +1,6 @@
 <?php
 require_once '../includes/db.php';
 
-// Proteksi Halaman: Wajib login untuk mengakses halaman ini
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['error_message'] = "Silakan login untuk melihat tiket Anda.";
     header("Location: login.php");
@@ -11,11 +10,8 @@ if (!isset($_SESSION['user_id'])) {
 $page_title = 'Tiket Saya';
 require_once '../includes/header.php';
 
-// Ambil ID pengguna dari session
 $user_id = $_SESSION['user_id'];
 
-// Query untuk mengambil semua tiket yang pernah dibeli oleh pengguna ini
-// Kita JOIN dengan tabel 'tickets' untuk mendapatkan nama tiketnya
 $sql = "SELECT 
             p.transaction_code, 
             p.quantity, 
@@ -26,7 +22,7 @@ $sql = "SELECT
         FROM ticket_purchases p
         JOIN tickets t ON p.ticket_id = t.id
         WHERE p.user_id = ?
-        ORDER BY p.purchase_date DESC"; // Tampilkan yang terbaru di atas
+        ORDER BY p.purchase_date DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);

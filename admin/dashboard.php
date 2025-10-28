@@ -1,9 +1,8 @@
 <?php
 require_once 'includes/db.php';
 
-// Proteksi halaman: Wajib login DAN rolenya harus 'admin'
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    // Jika bukan admin, tendang ke halaman utama
+
     header("Location: index.php");
     exit();
 }

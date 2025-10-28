@@ -1,7 +1,6 @@
 <?php
 require_once '../includes/db.php';
 
-// Proteksi halaman: Wajib login dan harus ada data pesanan di session
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['last_purchase_ids'])) {
     header("Location: index.php");
     exit();
@@ -10,14 +9,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['last_purchase_ids'])) {
 $page_title = 'Pesanan Berhasil';
 require_once '../includes/header.php';
 
-// Ambil ID pesanan dari session
 $purchase_ids = $_SESSION['last_purchase_ids'];
 $order_details = [];
 
 if (!empty($purchase_ids)) {
     $placeholders = implode(',', array_fill(0, count($purchase_ids), '?'));
     
-    // Query untuk mengambil detail pesanan yang baru saja dibuat
+
     $sql = "SELECT p.quantity, p.total_price, t.category_name 
             FROM ticket_purchases p
             JOIN tickets t ON p.ticket_id = t.id
@@ -29,7 +27,6 @@ if (!empty($purchase_ids)) {
     $order_details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Hapus session setelah data diambil agar tidak bisa di-refresh
 unset($_SESSION['last_purchase_ids']);
 ?>
 
