@@ -19,5 +19,5 @@
     </div>
 </footer>
 
-<script src="assets/js/script.js"></script> </body>
+<script src="/upfm_web/assets/js/main.js"></script> </body>
 </html>

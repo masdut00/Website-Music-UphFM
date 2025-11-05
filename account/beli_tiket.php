@@ -45,7 +45,7 @@ require_once '../includes/header.php';
             <div class="product-gallery">
                 <?php if (!empty($ticket_images)): ?>
                     <?php foreach ($ticket_images as $image): ?>
-                        <div class="gallery-image" style="background-image: url('assets/images/tickets/<?php echo htmlspecialchars($image['image_url']); ?>');"></div>
+                        <div class="gallery-image" style="background-image: url('/upfm_web/assets/images/tickets/<?php echo htmlspecialchars($image['image_url']); ?>');"></div>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="gallery-image-placeholder"></div>
@@ -96,7 +96,7 @@ require_once '../includes/header.php';
     <?php else: ?>
         <div class="ticket-not-found">
             <h2>Oops! Tiket tidak ditemukan.</h2>
-            <a href="./explore.php" class="btn-standard">Kembali ke Halaman Explore</a>
+            <a href="/upfm_web/explore.php" class="btn-standard">Kembali ke Halaman Explore</a>
         </div>
     <?php endif; ?>
 </div>

@@ -3,7 +3,7 @@
 $host = 'localhost';
 $user = 'root';
 $pass = '';
-$dbname = 'upfm_db';
+$dbname = 'upfm_new';
 $conn = new mysqli($host, $user, $pass, $dbname);
 
 if ($conn->connect_error) {
