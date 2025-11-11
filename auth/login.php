@@ -6,7 +6,7 @@ if (isset($_SESSION['user_id'])) {
     header("Location: /upfm_web/index.php");
     exit();
 }
-
+//test
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
