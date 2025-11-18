@@ -68,5 +68,5 @@ unset($_SESSION['last_purchase_ids']);
 </div>
 
 <?php
-require_once 'includes/footer.php';
+require_once '../includes/footer.php';
 ?>

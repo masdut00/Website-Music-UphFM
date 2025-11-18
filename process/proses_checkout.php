@@ -17,31 +17,53 @@ $new_purchase_ids = []; // Untuk halaman sukses
 // --- PROSES TIKET ---
 if (!empty($cart_tickets)) {
     $ticket_ids = array_column($cart_tickets, 'id');
-    $placeholders = implode(',', array_fill(0, count($ticket_ids), '?'));
-    $sql = "SELECT id, price FROM tickets WHERE id IN ($placeholders)";
-    $stmt_prices = $conn->prepare($sql);
-    $stmt_prices->bind_param(str_repeat('i', count($ticket_ids)), ...$ticket_ids);
-    $stmt_prices->execute();
-    $prices_result = $stmt_prices->get_result()->fetch_all(MYSQLI_ASSOC);
-    $prices = array_column($prices_result, 'price', 'id');
+    
+    // Cegah error jika array kosong (walaupun sudah dicek di empty)
+    if(count($ticket_ids) > 0) {
+        $placeholders = implode(',', array_fill(0, count($ticket_ids), '?'));
+        
+        // 1. Ambil data harga dari database
+        $sql = "SELECT id, price FROM tickets WHERE id IN ($placeholders)";
+        $stmt_prices = $conn->prepare($sql);
+        $stmt_prices->bind_param(str_repeat('i', count($ticket_ids)), ...$ticket_ids);
+        $stmt_prices->execute();
+        $prices_result = $stmt_prices->get_result()->fetch_all(MYSQLI_ASSOC);
+        $prices = array_column($prices_result, 'price', 'id');
+        $stmt_prices->close(); // Tutup koneksi harga
 
-    $stmt_insert = $conn->prepare("INSERT INTO ticket_purchases (user_id, ticket_id, quantity, total_price, payment_status, transaction_code) VALUES (?, ?, ?, ?, 'success', ?)");
+        // 2. Siapkan statement INSERT ke ticket_purchases
+        $stmt_insert = $conn->prepare("INSERT INTO ticket_purchases (user_id, ticket_id, quantity, total_price, payment_status, transaction_code) VALUES (?, ?, ?, ?, 'success', ?)");
 
-    foreach ($cart_tickets as $item) {
-        if (isset($prices[$item['id']])) {
-            $price = $prices[$item['id']];
-            $total_price = $price * $item['quantity'];
-            $transaction_code = 'UPFM-T-' . $user_id . '-' . time() . '-' . $item['id'];
-            
-            $stmt_insert->bind_param("iiids", $user_id, $item['id'], $item['quantity'], $total_price, $transaction_code);
-            $stmt_insert->execute();
-            $new_purchase_ids[] = $stmt_insert->insert_id; // Simpan ID untuk halaman sukses
+        // 3. ✅ DEFINISIKAN VARIABEL UPDATE STOCK DISINI (SEBELUM LOOP)
+        // Pastikan tabel Anda bernama 'tickets' dan kolom stok bernama 'stock'
+        $stmt_update_stock = $conn->prepare("UPDATE tickets SET quantity_available = quantity_available - ? WHERE id = ?");
 
-            $stmt_update_stock->bind_param("ii", $item['quantity'], $item['id']);
-            $stmt_update_stock->execute();
+        // Cek apakah prepare berhasil (untuk debugging)
+        if (!$stmt_update_stock) {
+            die("Error prepare update stock: " . $conn->error);
         }
+
+        foreach ($cart_tickets as $item) {
+            if (isset($prices[$item['id']])) {
+                $price = $prices[$item['id']];
+                $total_price = $price * $item['quantity'];
+                $transaction_code = 'UPFM-T-' . $user_id . '-' . time() . '-' . $item['id'];
+                
+                // Eksekusi Insert
+                $stmt_insert->bind_param("iiids", $user_id, $item['id'], $item['quantity'], $total_price, $transaction_code);
+                $stmt_insert->execute();
+                $new_purchase_ids[] = $stmt_insert->insert_id; 
+
+                // 4. ✅ EKSEKUSI UPDATE STOCK (Line 40-an Anda ada di sini)
+                $stmt_update_stock->bind_param("ii", $item['quantity'], $item['id']);
+                $stmt_update_stock->execute();
+            }
+        }
+        
+        // Tutup statement
+        $stmt_insert->close();
+        $stmt_update_stock->close();
     }
-    $stmt_update_stock->close();
 }
 
 // --- PROSES MERCHANDISE ---
