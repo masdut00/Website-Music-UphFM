@@ -1,10 +1,9 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan (tetap)
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php'; 
 
 $page_title = 'Admin Dashboard';
 
-// (Logika PHP untuk ambil data stats tetap sama)
 $total_users = $conn->query("SELECT COUNT(id) AS total FROM users")->fetch_assoc()['total'];
 $total_tickets = $conn->query("SELECT COUNT(id) AS total FROM tickets")->fetch_assoc()['total'];
 $total_purchases = $conn->query("SELECT COUNT(id) AS total FROM ticket_purchases")->fetch_assoc()['total'];
@@ -22,7 +21,7 @@ $total_purchases = $conn->query("SELECT COUNT(id) AS total FROM ticket_purchases
 
 <div class="admin-wrapper">
     
-    <?php require_once '../includes/admin_sidebar.php'; // Panggil Sidebar BARU ?>
+    <?php require_once '../includes/admin_sidebar.php';?>
 
     <div class="admin-main-content">
         <div class="admin-header">

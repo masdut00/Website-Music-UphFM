@@ -1,16 +1,16 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola FAQ';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS (DELETE)
+// Logika hapus
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
-    // Ini adalah hard delete, yang aman untuk FAQ
+    // Ini adalah hard delete untuk FAQ
     $stmt = $conn->prepare("DELETE FROM faq WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
     if ($stmt->execute()) {

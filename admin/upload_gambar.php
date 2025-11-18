@@ -8,13 +8,12 @@ $is_edit_mode = ($image_id > 0);
 $message = '';
 $message_type = '';
 
-// Inisialisasi variabel SESUAI DATABASE ANDA
 $title = ''; 
-$media_type = 'photo'; // Default
-$year = date('Y'); // Default tahun ini
+$media_type = 'photo';
+$year = date('Y');
 $current_media_url = '';
 
-// Ambil data lama jika ini mode edit
+// Ambil data lama
 if ($is_edit_mode) {
     $page_title = 'Edit Media Galeri';
     $stmt = $conn->prepare("SELECT * FROM gallery WHERE id = ?");
@@ -22,24 +21,22 @@ if ($is_edit_mode) {
     $stmt->execute();
     $image_data = $stmt->get_result()->fetch_assoc();
     if ($image_data) {
-        // --- BLOK INI KITA UBAH ---
         $title = isset($image_data['title']) ? $image_data['title'] : '';
         $media_type = isset($image_data['media_type']) ? $image_data['media_type'] : 'photo';
         $year = isset($image_data['year']) ? $image_data['year'] : date('Y');
         $current_media_url = isset($image_data['media_url']) ? $image_data['media_url'] : '';
-        // --- AKHIR BLOK ---
     }
     $stmt->close();
 }
 
-// Logika Simpan Data (Create / Update)
+// Logika Simpan Data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $media_type = $_POST['media_type'];
     $year = $_POST['year'];
-    $new_media_name = $current_media_url; // Default ke gambar lama
+    $new_media_name = $current_media_url;
 
-    // Logika Upload Foto (Hanya jika file baru diunggah)
+    // Logika Upload Foto
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $target_dir = "../assets/images/gallery/";
         
@@ -49,9 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_media_name = time() . '_' . rand(1000,9999) . '_' . $image_name;
         $target_file = $target_dir . $new_media_name;
         
-        // Validasi sederhana (bisa ditambahkan)
+        // Validasi sederhana
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Hapus gambar lama jika ini mode edit
             if ($is_edit_mode && !empty($current_media_url) && file_exists($target_dir . $current_media_url)) {
                 unlink($target_dir . $current_media_url);
             }
@@ -61,27 +57,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (empty($message)) { // Lanjut jika tidak ada error upload
+    if (empty($message)) {
         if ($is_edit_mode) {
-            // QUERY UPDATE BARU
             $sql = "UPDATE gallery SET title = ?, media_type = ?, year = ?, media_url = ?, thumbnail_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             // Untuk thumbnail, kita samakan saja dengan media_url
             $stmt->bind_param("sssssi", $title, $media_type, $year, $new_media_name, $new_media_name, $image_id);
         } else {
-            // QUERY INSERT BARU
             $sql = "INSERT INTO gallery (title, media_type, year, media_url, thumbnail_url, uploaded_by_user_id) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             // Untuk thumbnail, kita samakan saja dengan media_url
             $stmt->bind_param("sssssi", $title, $media_type, $year, $new_media_name, $new_media_name, $admin_id);
         }
         
-        // Baris 80 Anda ada di sekitar sini
         if ($stmt && $stmt->execute()) {
             header("Location: kelola_galeri.php");
             exit();
         } else {
-            $message = 'Gagal menyimpan data: ' . $conn->error; // Tampilkan error SQL
+            $message = 'Gagal menyimpan data: ' . $conn->error;
             $message_type = 'error';
         }
     }

@@ -3,10 +3,8 @@ require_once 'includes/db.php';
 $page_title = 'FAQ - Informasi';
 require_once 'includes/header.php';
 
-// Ambil semua data FAQ, diurutkan berdasarkan kategori
 $all_faqs = $conn->query("SELECT * FROM faq ORDER BY category, id")->fetch_all(MYSQLI_ASSOC);
 
-// Kelompokkan FAQ berdasarkan Kategori
 $faqs_by_category = [];
 foreach ($all_faqs as $faq) {
     $faqs_by_category[$faq['category']][] = $faq;

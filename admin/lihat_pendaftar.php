@@ -1,15 +1,15 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Lihat Pendaftar';
 $message = '';
 $message_type = '';
 
-// --- BARU: LOGIKA UNTUK UPDATE STATUS ---
+// untuk update status
 if (isset($_GET['action']) && isset($_GET['type']) && isset($_GET['id'])) {
     $action = $_GET['action'];
-    $type = $_GET['type']; // 'volunteer' or 'tenant'
+    $type = $_GET['type'];
     $id = (int)$_GET['id'];
     $new_status = '';
 
@@ -41,10 +41,9 @@ if (isset($_GET['action']) && isset($_GET['type']) && isset($_GET['id'])) {
         }
     }
 }
-// --- AKHIR LOGIKA BARU ---
 
 
-// Ambil data Volunteers (query Anda sudah benar, v.* akan mengambil 'status')
+// Ambil data Volunteers
 $sql_volunteers = "SELECT v.*, u.email AS user_email 
                    FROM volunteers v
                    LEFT JOIN users u ON v.user_id = u.id

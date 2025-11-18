@@ -1,20 +1,17 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Tiket';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS TIKET
+// Logika hapus tiket
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
-    // Hati-hati: Menghapus tiket bisa merusak data di 'ticket_purchases'
-    // Sebaiknya, kita nonaktifkan saja tiketnya daripada menghapus
     // $stmt = $conn->prepare("DELETE FROM tickets WHERE id = ?");
     
-    // Cara yang LEBIH AMAN: Set quantity_available = 0 (menonaktifkan)
     $stmt = $conn->prepare("UPDATE tickets SET quantity_available = 0 WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
     

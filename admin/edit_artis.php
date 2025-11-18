@@ -8,10 +8,8 @@ $is_edit_mode = ($artist_id > 0);
 $message = '';
 $message_type = '';
 
-// Inisialisasi variabel
 $name = ''; $genre = ''; $description = ''; $is_headliner = 0; $current_image = '';
 
-// LOGIKA EDIT (UPDATE) - Jika ini mode edit, ambil data lama
 if ($is_edit_mode) {
     $page_title = 'Edit Artis';
     $stmt = $conn->prepare("SELECT * FROM artists WHERE id = ?");
@@ -28,24 +26,21 @@ if ($is_edit_mode) {
     $stmt->close();
 }
 
-// LOGIKA SIMPAN DATA (CREATE / UPDATE)
+//simpan data (create / update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ambil data dari form
     $name = $_POST['name'];
     $genre = $_POST['genre'];
     $description = $_POST['description'];
     $is_headliner = isset($_POST['is_headliner']) ? 1 : 0;
-    $new_image_name = $current_image; // Defaultnya, tetap pakai gambar lama
+    $new_image_name = $current_image;
 
-    // LOGIKA UPLOAD FOTO
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $target_dir = "../assets/images/artists/";
         $image_name = basename($_FILES["image"]["name"]);
-        $new_image_name = time() . '_' . $image_name; // Buat nama unik
+        $new_image_name = time() . '_' . $image_name;
         $target_file = $target_dir . $new_image_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Sukses upload, hapus gambar lama jika ini mode edit
             if ($is_edit_mode && !empty($current_image) && file_exists($target_dir . $current_image)) {
                 unlink($target_dir . $current_image);
             }
@@ -55,14 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (empty($message)) { // Lanjut jika tidak ada error upload
+    if (empty($message)) {
         if ($is_edit_mode) {
-            // Query UPDATE
+            // Query update
             $sql = "UPDATE artists SET name = ?, genre = ?, description = ?, is_headliner = ?, image_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sssisi", $name, $genre, $description, $is_headliner, $new_image_name, $artist_id);
         } else {
-            // Query INSERT
+            // Query insert
             $sql = "INSERT INTO artists (name, genre, description, is_headliner, image_url) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sssis", $name, $genre, $description, $is_headliner, $new_image_name);

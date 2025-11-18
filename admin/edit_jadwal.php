@@ -8,14 +8,11 @@ $is_edit_mode = ($schedule_id > 0);
 $message = '';
 $message_type = '';
 
-// --- Ambil data untuk <select> dropdown ---
 $artists = $conn->query("SELECT id, name FROM artists ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 $stages = $conn->query("SELECT id, name FROM stages ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
-// Inisialisasi variabel
 $artist_id = ''; $stage_id = ''; $event_day = ''; $start_time = ''; $end_time = '';
 
-// Ambil data lama jika ini mode edit
 if ($is_edit_mode) {
     $page_title = 'Edit Jadwal';
     $stmt = $conn->prepare("SELECT * FROM schedules WHERE id = ?");

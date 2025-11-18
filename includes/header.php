@@ -1,5 +1,4 @@
 <?php
-// Logika penghitung keranjang harus ada SEBELUM HTML
 $total_items_in_cart = 0;
 if (!empty($_SESSION['cart']['tickets'])) {
     $total_items_in_cart += count($_SESSION['cart']['tickets']);

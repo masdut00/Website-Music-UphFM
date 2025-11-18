@@ -6,10 +6,8 @@ require_once 'includes/header.php';
 $message = '';
 $message_type = '';
 
-// Cek apakah user login, untuk dihubungkan ke relasi user_id
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-// --- LOGIKA FORM 1: PENDAFTARAN VOLUNTEER ---
 if (isset($_POST['daftar_volunteer'])) {
     $full_name = $_POST['full_name'];
     $email = $_POST['email'];
@@ -29,7 +27,6 @@ if (isset($_POST['daftar_volunteer'])) {
     }
 }
 
-// --- LOGIKA FORM 2: PENDAFTARAN TENANT ---
 if (isset($_POST['daftar_tenant'])) {
     $brand_name = $_POST['brand_name'];
     $contact_person = $_POST['contact_person'];

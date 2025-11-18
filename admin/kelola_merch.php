@@ -1,16 +1,15 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Merchandise';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS (Soft Delete)
+// Logika hapus
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
-    // Kita set stok ke 0 (soft delete) agar aman untuk riwayat pembelian
     $stmt = $conn->prepare("UPDATE merchandise SET stock = 0 WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
     
@@ -24,7 +23,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
     $stmt->close();
 }
 
-// Ambil semua data merchandise
 $merch_items = $conn->query("SELECT * FROM merchandise ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
 
 ?>

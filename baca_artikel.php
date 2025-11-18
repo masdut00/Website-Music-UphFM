@@ -1,14 +1,12 @@
 <?php
 require_once 'includes/db.php';
 
-// Ambil ID artikel dari URL
 $article_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($article_id <= 0) {
-    header("Location: journal.php"); // Jika ID tidak valid, lempar kembali
+    header("Location: journal.php");
     exit();
 }
 
-// Ambil satu artikel spesifik
 $stmt = $conn->prepare(
     "SELECT j.*, u.full_name AS author_name 
      FROM journal_articles j
@@ -21,11 +19,11 @@ $article = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$article) {
-    header("Location: journal.php"); // Jika artikel tidak ditemukan
+    header("Location: journal.php");
     exit();
 }
 
-$page_title = $article['title']; // Judul halaman di tab browser
+$page_title = $article['title'];
 require_once 'includes/header.php';
 ?>
 
@@ -48,7 +46,6 @@ require_once 'includes/header.php';
 
     <div class="article-full-content">
         <?php
-        // nl2br() adalah fungsi ajaib yang mengubah baris baru (\n) menjadi tag HTML <br>
         echo nl2br(htmlspecialchars($article['content'])); 
         ?>
     </div>

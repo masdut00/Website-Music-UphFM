@@ -3,12 +3,8 @@ require_once 'includes/db.php';
 $page_title = 'Galeri Festival';
 require_once 'includes/header.php';
 
-// --- AMBIL DATA DARI DATABASE ---
-
-// 1. Ambil 5 gambar terbaru untuk "Highlight Moments Slider"
 $slider_items = $conn->query("SELECT * FROM gallery WHERE media_type = 'photo' ORDER BY id DESC LIMIT 5")->fetch_all(MYSQLI_ASSOC);
 
-// 2. Ambil SEMUA item galeri untuk "Album Foto"
 $gallery_items = $conn->query("SELECT * FROM gallery ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
 ?>
 

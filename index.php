@@ -3,8 +3,6 @@ require_once 'includes/db.php';
 $page_title = 'Selamat Datang di UpFM';
 require_once 'includes/header.php';
 
-// --- 1. AMBIL DATA HIGHLIGHT ARTIS ---
-// Ambil 3 artis yang ditandai sebagai 'is_headliner = 1'
 $headliners = $conn->query(
     "SELECT * FROM artists 
      WHERE is_headliner = 1 
@@ -12,8 +10,6 @@ $headliners = $conn->query(
      LIMIT 3"
 )->fetch_all(MYSQLI_ASSOC);
 
-// --- 2. AMBIL DATA PREVIEW GALERI ---
-// Ambil 3 foto terbaru dari galeri
 $gallery_preview = $conn->query(
     "SELECT * FROM gallery 
      WHERE media_type = 'photo' 

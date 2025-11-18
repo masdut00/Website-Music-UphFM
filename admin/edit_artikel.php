@@ -8,10 +8,8 @@ $is_edit_mode = ($article_id > 0);
 $message = '';
 $message_type = '';
 
-// Inisialisasi variabel
 $title = ''; $content = ''; $category = ''; $current_image = '';
 
-// Ambil data lama jika ini mode edit
 if ($is_edit_mode) {
     $page_title = 'Edit Artikel';
     $stmt = $conn->prepare("SELECT * FROM journal_articles WHERE id = ?");
@@ -27,28 +25,24 @@ if ($is_edit_mode) {
     $stmt->close();
 }
 
-// Logika Simpan Data (Create / Update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'];
     $content = $_POST['content'];
     $category = $_POST['category'];
-    $new_image_name = $current_image; // Default
+    $new_image_name = $current_image;
 
-    // Logika Upload Foto
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $target_dir = "../assets/images/articles/";
         
-        // Pastikan folder 'articles' ada
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
 
         $image_name = basename($_FILES["image"]["name"]);
-        $new_image_name = time() . '_' . $image_name; // Buat nama unik
+        $new_image_name = time() . '_' . $image_name;
         $target_file = $target_dir . $new_image_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Hapus gambar lama jika ada
             if ($is_edit_mode && !empty($current_image) && file_exists($target_dir . $current_image)) {
                 unlink($target_dir . $current_image);
             }
@@ -58,13 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (empty($message)) { // Lanjut jika tidak ada error upload
+    if (empty($message)) {
         if ($is_edit_mode) {
             $sql = "UPDATE journal_articles SET title = ?, content = ?, category = ?, image_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ssssi", $title, $content, $category, $new_image_name, $article_id);
         } else {
-            // Kita juga masukkan user_id dari admin yang login
             $sql = "INSERT INTO journal_articles (title, content, category, image_url, user_id) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ssssi", $title, $content, $category, $new_image_name, $admin_id);

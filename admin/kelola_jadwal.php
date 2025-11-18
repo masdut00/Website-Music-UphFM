@@ -1,16 +1,15 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Jadwal';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS (DELETE)
+// Logika hapus
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
-    
-    // Ini aman untuk di-hard-delete
+
     $stmt = $conn->prepare("DELETE FROM schedules WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
     if ($stmt->execute()) {
@@ -23,7 +22,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
     $stmt->close();
 }
 
-// Ambil semua data jadwal dengan JOIN
+// Ambil semua data jadwal pake JOIN
 $sql = "SELECT 
             s.id, 
             s.event_day, 

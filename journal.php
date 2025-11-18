@@ -3,7 +3,6 @@ require_once 'includes/db.php';
 $page_title = 'Jurnal UpFM';
 require_once 'includes/header.php';
 
-// Ambil semua artikel dari database, yang terbaru di atas
 $articles = $conn->query("SELECT * FROM journal_articles ORDER BY publish_date DESC")->fetch_all(MYSQLI_ASSOC);
 ?>
 
@@ -23,7 +22,6 @@ $articles = $conn->query("SELECT * FROM journal_articles ORDER BY publish_date D
                         <h3 class="article-title"><?php echo htmlspecialchars($article['title']); ?></h3>
                         <p class="article-snippet">
                             <?php
-                            // Ambil 100 karakter pertama dari konten sebagai cuplikan
                             echo htmlspecialchars(substr($article['content'], 0, 100)) . '...'; 
                             ?>
                         </p>

@@ -1,5 +1,5 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan (mengambil $admin_id)
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Tambah FAQ';
@@ -8,10 +8,8 @@ $is_edit_mode = ($faq_id > 0);
 $message = '';
 $message_type = '';
 
-// Inisialisasi variabel
-$question = ''; $answer = ''; $category = 'General'; // Default kategori
+$question = ''; $answer = ''; $category = 'General';
 
-// Ambil data lama jika ini mode edit
 if ($is_edit_mode) {
     $page_title = 'Edit FAQ';
     $stmt = $conn->prepare("SELECT * FROM faq WHERE id = ?");

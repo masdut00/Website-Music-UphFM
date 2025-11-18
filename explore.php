@@ -5,7 +5,6 @@ require_once 'includes/header.php';
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
-// Query Tiket (Kode Anda sudah benar)
 $sql_tickets = "SELECT 
                     t.id, 
                     t.category_name, 
@@ -26,7 +25,6 @@ if ($filter !== 'all') {
 $stmt->execute();
 $tickets = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Query Merchandise (Kode Anda sudah benar)
 $sql_merch = "SELECT id, item_name, price, image_url FROM merchandise WHERE stock > 0 ORDER BY id";
 $merchandise_items = $conn->query($sql_merch)->fetch_all(MYSQLI_ASSOC);
 ?>

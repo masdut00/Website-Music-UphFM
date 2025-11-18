@@ -3,14 +3,13 @@ require_once '../includes/db.php';
 $page_title = 'Keranjang Belanja';
 require_once '../includes/header.php';
 
-// Ambil item dari session
 $cart_tickets = isset($_SESSION['cart']['tickets']) ? $_SESSION['cart']['tickets'] : [];
 $cart_merch = isset($_SESSION['cart']['merch']) ? $_SESSION['cart']['merch'] : [];
 
 $items_in_cart = [];
 $grand_total = 0;
 
-// 1. Proses TIKET
+// 1. tiket
 if (!empty($cart_tickets)) {
     $ticket_ids = array_column($cart_tickets, 'id');
     $placeholders = implode(',', array_fill(0, count($ticket_ids), '?'));
@@ -37,7 +36,6 @@ if (!empty($cart_tickets)) {
     }
 }
 
-// 2. Proses MERCHANDISE
 if (!empty($cart_merch)) {
     $merch_ids = array_column($cart_merch, 'id');
     $placeholders = implode(',', array_fill(0, count($merch_ids), '?'));

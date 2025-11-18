@@ -3,11 +3,8 @@ require_once 'includes/db.php';
 $page_title = 'Kontak Kami';
 require_once 'includes/header.php';
 
-// (Di sini Anda bisa menambahkan logika PHP untuk mengirim email formulir nanti)
 $message_sent = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
-    // Logika kirim email (untuk nanti)
-    // mail("admin@upfm.com", "Pesan dari Web", $_POST['message']);
     $message_sent = true;
 }
 ?>

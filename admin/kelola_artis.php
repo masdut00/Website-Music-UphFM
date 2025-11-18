@@ -1,16 +1,15 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan admin
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Artis';
 $message = '';
 $message_type = '';
 
-// LOGIKA HAPUS DATA (DELETE)
+// hapus data
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
-    // Hapus juga gambar dari server (opsional tapi bagus)
     $stmt_img = $conn->prepare("SELECT image_url FROM artists WHERE id = ?");
     $stmt_img->bind_param("i", $id_to_delete);
     $stmt_img->execute();
@@ -32,7 +31,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
     $stmt->close();
 }
 
-// LOGIKA AMBIL DATA (READ)
+// read data
 $artists = $conn->query("SELECT * FROM artists ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
 require_once '../includes/header.php';

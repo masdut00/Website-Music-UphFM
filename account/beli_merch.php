@@ -1,18 +1,15 @@
 <?php
-require_once '../includes/db.php'; // Mulai session dan koneksi DB
+require_once '../includes/db.php';
 
-// Proteksi Halaman: Wajib login
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['error_message'] = "Anda harus login untuk melihat detail merchandise.";
     header("Location: /upfm_web/auth/login.php");
     exit();
 }
 
-// Ambil ID item dari URL
 $item_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($item_id <= 0) { die("ID Item tidak valid."); }
 
-// Ambil detail merchandise dari database
 $stmt = $conn->prepare("SELECT * FROM merchandise WHERE id = ? AND stock > 0");
 $stmt->bind_param("i", $item_id);
 $stmt->execute();
@@ -26,14 +23,13 @@ require_once '../includes/header.php';
 <div class="container page-container">
 
     <?php 
-    // DITAMBAHKAN: Tampilkan pesan sukses jika ada
-    if (isset($_SESSION['cart_message'])) {
-        echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
-        unset($_SESSION['cart_message']);
-    }
+        if (isset($_SESSION['cart_message'])) {
+            echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
+            unset($_SESSION['cart_message']);
+        }
     ?>
 
-    <?php if ($item): // Jika item ditemukan dan stoknya ada ?>
+    <?php if ($item):?>
         <div class="product-page-wrapper">
             
             <div class="product-gallery-single">
@@ -66,7 +62,7 @@ require_once '../includes/header.php';
                 </form>
             </div>
         </div>
-    <?php else: // Jika item tidak ditemukan atau stok habis ?>
+    <?php else: ?>
         <div class="ticket-not-found">
             <h2>Oops! Item tidak ditemukan.</h2>
             <p>Mohon maaf, item yang Anda cari mungkin sudah habis terjual atau link yang Anda masukkan salah.</p>

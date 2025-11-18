@@ -8,7 +8,7 @@ $is_edit_mode = ($ticket_id > 0);
 $message = '';
 $message_type = '';
 
-// --- LOGIKA HAPUS TIPE TIKET (DELETE) ---
+//hapus tiket
 if (isset($_GET['hapus_tipe'])) {
     $type_id_to_delete = (int)$_GET['hapus_tipe'];
     $stmt_del = $conn->prepare("DELETE FROM ticket_types WHERE id = ? AND ticket_id = ?");
@@ -20,10 +20,10 @@ if (isset($_GET['hapus_tipe'])) {
     }
 }
 
-// --- LOGIKA SIMPAN DATA (CREATE / UPDATE) ---
+//simpan data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // --- A. Logika untuk SIMPAN TIKET UTAMA ---
+    // simpan tiket utama
     if (isset($_POST['simpan_tiket'])) {
         $category_name = $_POST['category_name'];
         $filter_tag = $_POST['filter_tag'];
@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute()) {
             $message = 'Data tiket berhasil disimpan!'; $message_type = 'success';
             if (!$is_edit_mode) {
-                // Jika ini tiket baru, arahkan ke mode edit
                 $new_id = $stmt->insert_id;
                 header("Location: edit_tiket.php?id=$new_id");
                 exit();
@@ -55,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 
-    // --- B. Logika untuk TAMBAH TIPE BARU ---
+    // tambah tipe baru
     if (isset($_POST['tambah_tipe'])) {
         $type_name = $_POST['type_name'];
         if (!empty($type_name) && $is_edit_mode) {
@@ -71,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// --- LOGIKA BACA DATA (READ) ---
-// Inisialisasi variabel
 $category_name = ''; $filter_tag = ''; $price = ''; $quantity_available = ''; $description = '';
 $current_images = [];
 $current_types = [];
@@ -99,7 +96,7 @@ if ($is_edit_mode) {
     $img_stmt->execute();
     $current_images = $img_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-    // Ambil TIPE TIKET yang sudah ada
+    // Ambil TIPE TIKET yang udah ada
     $types_stmt = $conn->prepare("SELECT id, type_name FROM ticket_types WHERE ticket_id = ?");
     $types_stmt->bind_param("i", $ticket_id);
     $types_stmt->execute();

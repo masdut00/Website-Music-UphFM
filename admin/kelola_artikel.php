@@ -1,12 +1,12 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Jurnal/Artikel';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS (DELETE)
+// Logika hapus
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     

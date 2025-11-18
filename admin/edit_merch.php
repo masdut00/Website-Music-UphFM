@@ -8,7 +8,6 @@ $is_edit_mode = ($item_id > 0);
 $message = '';
 $message_type = '';
 
-// Inisialisasi variabel
 $item_name = ''; $price = ''; $description = ''; $stock = 0; $current_image = '';
 
 // Ambil data lama jika ini mode edit
@@ -34,13 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = $_POST['price'];
     $description = $_POST['description'];
     $stock = (int)$_POST['stock'];
-    $new_image_name = $current_image; // Default
+    $new_image_name = $current_image;
 
     // Logika Upload Foto
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $target_dir = "../assets/images/merch/";
         
-        // Pastikan folder 'merch' ada
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
@@ -50,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $target_file = $target_dir . $new_image_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // Hapus gambar lama jika ada
             if ($is_edit_mode && !empty($current_image) && file_exists($target_dir . $current_image)) {
                 unlink($target_dir . $current_image);
             }
@@ -60,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (empty($message)) { // Lanjut jika tidak ada error upload
+    if (empty($message)) {
         if ($is_edit_mode) {
             $sql = "UPDATE merchandise SET item_name = ?, price = ?, description = ?, stock = ?, image_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);

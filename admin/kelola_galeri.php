@@ -1,12 +1,12 @@
 <?php
-require_once '../includes/admin_auth.php'; // Keamanan
+require_once '../includes/admin_auth.php';
 require_once '../includes/db.php';
 
 $page_title = 'Kelola Galeri Foto';
 $message = '';
 $message_type = '';
 
-// Logika HAPUS (DELETE)
+// Logika hapus
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
@@ -22,7 +22,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
     $stmt = $conn->prepare("DELETE FROM gallery WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
     if ($stmt->execute()) {
-        // Hapus file fisik jika ada
         if ($image_file_to_delete && file_exists('../assets/images/gallery/' . $image_file_to_delete)) {
             unlink('../assets/images/gallery/' . $image_file_to_delete);
         }

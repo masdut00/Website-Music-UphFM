@@ -12,7 +12,6 @@ if (!isset($_SESSION['user_id'])) {
 $ticket_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($ticket_id <= 0) { die("ID Tiket tidak valid."); }
 
-// (Logika pengambilan data Anda di sini sudah benar... )
 $stmt = $conn->prepare("SELECT category_name, price, description FROM tickets WHERE id = ?");
 $stmt->bind_param("i", $ticket_id);
 $stmt->execute();
@@ -38,11 +37,10 @@ require_once '../includes/header.php';
 <div class="container page-container">
     
     <?php 
-    // Tampilkan pesan sukses jika ada (DI SINI POSISI YANG BENAR)
-    if (isset($_SESSION['cart_message'])) {
-        echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
-        unset($_SESSION['cart_message']);
-    }
+        if (isset($_SESSION['cart_message'])) {
+            echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
+            unset($_SESSION['cart_message']);
+        }
     ?>
 
     <?php if ($ticket): ?>
