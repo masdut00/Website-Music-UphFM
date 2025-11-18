@@ -24,6 +24,15 @@ require_once '../includes/header.php';
 ?>
 
 <div class="container page-container">
+
+    <?php 
+    // DITAMBAHKAN: Tampilkan pesan sukses jika ada
+    if (isset($_SESSION['cart_message'])) {
+        echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
+        unset($_SESSION['cart_message']);
+    }
+    ?>
+
     <?php if ($item): // Jika item ditemukan dan stoknya ada ?>
         <div class="product-page-wrapper">
             
@@ -40,8 +49,11 @@ require_once '../includes/header.php';
                 <p class="product-seller">by UpFM Official</p>
 
                 <form action="/upfm_web/process/tambah_keranjang.php" method="POST">
+                    
                     <input type="hidden" name="item_id" value="<?php echo $item['id']; ?>">
-                    <input type="hidden" name="item_type" value="merch"> <div class="detail-group">
+                    <input type="hidden" name="item_type" value="merch">
+                    
+                    <div class="detail-group">
                         <label>Quantity</label>
                         <div class="quantity-selector">
                             <button type="button" class="quantity-btn" id="minus-btn">-</button>
@@ -81,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         plusBtn.addEventListener('click', function() {
             let currentVal = parseInt(quantityInput.value);
-            quantityInput.value = currentVal + 1; // Anda bisa tambahkan cek maks stok di sini
+            quantityInput.value = currentVal + 1;
         });
     }
 });

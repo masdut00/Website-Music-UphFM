@@ -61,7 +61,7 @@ unset($_SESSION['last_purchase_ids']);
             <p>Anda dapat melihat semua tiket yang telah Anda beli di halaman **"Tiket Saya"** pada profil Anda.</p>
             <div class="action-buttons">
                 <a href="/upfm_web/index.php" class="btn-secondary">Kembali ke Beranda</a>
-                <a href="my_tickets.php" class="btn-standard">Lihat Tiket Saya</a>
+                <a href="/upfm_web/account/my_tickets.php" class="btn-standard">Lihat Tiket Saya</a>
             </div>
         </div>
     </div>

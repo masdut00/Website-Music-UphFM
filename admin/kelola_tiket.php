@@ -29,7 +29,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) 
 }
 
 // Ambil semua data tiket
-$tickets = $conn->query("SELECT * FROM tickets ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
+$sql = "SELECT t.*, COUNT(tt.id) AS type_count 
+        FROM tickets t
+        LEFT JOIN ticket_types tt ON t.id = tt.ticket_id
+        GROUP BY t.id
+        ORDER BY t.id DESC";
+$tickets = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -62,10 +67,10 @@ $tickets = $conn->query("SELECT * FROM tickets ORDER BY id DESC")->fetch_all(MYS
                     <th>Tag Filter</th>
                     <th>Harga</th>
                     <th>Stok</th>
-                    <th>Aksi</th>
+                    <th>Jml. Tipe</th> <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+           <tbody>
                 <?php foreach ($tickets as $ticket): ?>
                     <tr>
                         <td><?php echo $ticket['id']; ?></td>
@@ -73,6 +78,9 @@ $tickets = $conn->query("SELECT * FROM tickets ORDER BY id DESC")->fetch_all(MYS
                         <td><?php echo htmlspecialchars($ticket['filter_tag']); ?></td>
                         <td>Rp <?php echo number_format($ticket['price']); ?></td>
                         <td><?php echo $ticket['quantity_available'] > 0 ? $ticket['quantity_available'] : 'Habis'; ?></td>
+                        
+                        <td><?php echo $ticket['type_count']; ?></td>
+
                         <td class="table-actions">
                             <a href="edit_tiket.php?id=<?php echo $ticket['id']; ?>" class="btn-edit">Edit</a>
                             <?php if ($ticket['quantity_available'] > 0): ?>

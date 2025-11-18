@@ -2,7 +2,7 @@
    DAFTAR ISI
    ==========================================================================
    1. Global Styles & Variables
-   2. Header & Navigasi Responsif (BARU)
+   2. Header & Navigasi
    3. Homepage Sections
    4. Halaman Spesifik (About, Explore, Gallery, dll.)
    5. Komponen (Tombol, Form, Alert)
@@ -62,7 +62,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   2. Header & Navigasi Responsif (BARU)
+   2. Header & Navigasi
    ========================================================================== */
    
 header {
@@ -102,11 +102,42 @@ ul#primary-navigation {
     font-size: 0.9rem;
     text-transform: uppercase;
     transition: color 0.2s ease-in-out;
+    padding-bottom: 5px; /* Beri sedikit ruang untuk garis bawah */
+    position: relative; /* Diperlukan untuk pseudo-element */
 }
 
 .primary-nav a:hover {
     color: var(--dark-color);
-    opacity: 1;
+    opacity: 1; 
+}
+
+/* Garis bawah animasi */
+.primary-nav a::after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0; /* Mulai dari 0 */
+    height: 2px;
+    background: var(--dark-color);
+    transition: width 0.3s ease; /* Efek animasi */
+}
+
+/* Saat di-hover, lebarkan garisnya */
+.primary-nav a:hover::after {
+    width: 100%;
+}
+
+/* Gaya untuk halaman yang AKTIF */
+.primary-nav a.active {
+    color: var(--dark-color); /* Warna teks lebih gelap */
+}
+
+/* Tampilkan garis bawah (tanpa animasi) untuk halaman aktif */
+.primary-nav a.active::after {
+    width: 100%;
+    background: var(--primary-color); /* Warna oranye */
 }
 
 /* Tombol Hamburger (Mobile) */
@@ -191,6 +222,34 @@ ul#primary-navigation {
     opacity: 1;
 }
 
+.cart-icon-wrapper {
+    position: relative;
+    display: block;
+    padding: 0 10px;
+}
+
+.cart-icon {
+    font-size: 1.5rem; /* Ukuran ikon keranjang */
+    color: var(--dark-color);
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: 0px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+}
+
 /* ==========================================================================
    3. Homepage Sections
    ========================================================================== */
@@ -230,9 +289,30 @@ ul#primary-navigation {
     padding: 4rem 0;
     background-color: var(--light-gray);
 }
+.artist-card-link {
+    text-decoration: none;
+}
+.artist-card {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.artist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+.artist-image {
+    height: 300px; /* Dibuat sedikit lebih tinggi */
+    background-color: var(--placeholder-gray);
+    background-size: cover;
+    background-position: center;
+}
 .artist-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* DIUBAH: Gunakan auto-fit agar lebih responsif */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
     gap: 25px;
 }
 .artist-card .artist-image-placeholder {
@@ -241,11 +321,25 @@ ul#primary-navigation {
 }
 .artist-card .card-info {
     text-align: center;
-    padding-top: 1rem;
+    padding: 1.5rem 1rem;
 }
 .artist-card h3 {
-    font-size: 1rem;
+    font-size: 1.2rem;
+    color: var(--dark-color);
+    margin: 0;
 }
+.photo-card {
+    height: 380px;
+    background-color: var(--placeholder-gray);
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s ease;
+}
+.photo-card:hover {
+    transform: scale(1.03);
+}
+
+
 
 /* ==========================================================================
    4. Halaman Spesifik (About, Explore, Gallery, dll.)
@@ -466,7 +560,6 @@ ul#primary-navigation {
 }
 .image-slider {
     display: flex;
-    width: calc(350px * 10); 
     animation: scroll 30s linear infinite;
 }
 .slider-container:hover .image-slider {
@@ -477,13 +570,15 @@ ul#primary-navigation {
     padding: 0 15px;
     flex-shrink: 0;
 }
-.slide-placeholder {
+.slide-image {
     height: 350px;
     background-color: var(--placeholder-gray);
+    background-size: cover;
+    background-position: center;
 }
 @keyframes scroll {
     from { transform: translateX(0); }
-    to { transform: translateX(calc(-350px * 5)); }
+    to { transform: translateX(-50%); }
 }
 .photo-album {
     padding-bottom: 5rem;
@@ -501,8 +596,11 @@ ul#primary-navigation {
 .album-thumbnail {
     height: 250px;
     background-color: var(--placeholder-gray);
+    background-size: cover;
+    background-position: center;
     margin-bottom: 1rem;
     transition: transform 0.3s ease;
+    position: relative; /* Diperlukan untuk ikon play */
 }
 .album-item:hover .album-thumbnail {
     transform: scale(1.03);
@@ -515,6 +613,21 @@ ul#primary-navigation {
     font-size: 0.9rem;
     font-weight: bold;
     display: inline-block;
+}
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 15px rgba(0,0,0,0.5);
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+.album-item:hover .play-icon {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
 }
 
 /* --- Beli Tiket (Product Detail) Page --- */
@@ -535,6 +648,10 @@ ul#primary-navigation {
     background-color: var(--placeholder-gray);
     background-size: cover;
     background-position: center;
+}
+.product-gallery-single .gallery-image {
+    width: 100%;
+    padding-bottom: 100%;
 }
 .product-details {
     position: relative;
@@ -662,6 +779,10 @@ ul#primary-navigation {
 .cart-remove-btn {
     color: #e74c3c;
     font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
 }
 .cart-remove-btn:hover {
     color: #c0392b;
@@ -753,6 +874,7 @@ ul#primary-navigation {
 }
 .next-steps p {
     margin-bottom: 2rem;
+    font-weight: normal;
 }
 .action-buttons {
     display: flex;
@@ -923,6 +1045,212 @@ ul#primary-navigation {
     box-sizing: border-box;
 }
 
+/* --- Halaman Jurnal (Daftar Artikel) --- */
+.journal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+.article-card {
+    text-decoration: none;
+    color: var(--dark-color);
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.article-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    opacity: 1;
+}
+.article-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.article-category {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.article-content {
+    padding: 1.5rem;
+}
+.article-title {
+    font-size: 1.3rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+.article-snippet {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-weight: normal;
+}
+.article-read-more {
+    display: inline-block;
+    margin-top: 1rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* --- Halaman Baca Artikel (Single) --- */
+.article-container {
+    max-width: 800px; /* Buat lebih sempit agar nyaman dibaca */
+    margin: 0 auto; /* Tengahkan konten */
+}
+.article-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.article-category-single {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.article-container h1 {
+    font-size: 2.5rem;
+    margin: 1rem 0;
+}
+.article-meta {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+.article-cover-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 2.5rem;
+}
+.article-full-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-color);
+    font-weight: normal;
+    margin-bottom: 3rem;
+}
+.btn-back {
+    font-weight: bold;
+}
+
+/* --- Halaman FAQ --- */
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.faq-category-group {
+    margin-bottom: 2.5rem;
+}
+.faq-category-title {
+    font-size: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: 1rem;
+}
+.faq-item {
+    border-bottom: 1px solid #eee;
+}
+.faq-question { /* Ini adalah tag <summary> */
+    padding: 1.25rem 0.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* Hapus panah default */
+    position: relative;
+    color: var(--dark-color);
+}
+.faq-question::after { /* Buat panah custom */
+    content: '+';
+    position: absolute;
+    right: 5px;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    transition: transform 0.2s ease;
+}
+.faq-answer { /* Ini adalah <div> di dalam <details> */
+    padding: 0 0.5rem 1.25rem 0.5rem;
+    color: var(--text-color);
+    line-height: 1.7;
+    font-weight: normal;
+}
+.faq-answer p {
+    margin: 0;
+}
+/* Saat accordion terbuka */
+.faq-item[open] .faq-question {
+    color: var(--primary-color);
+}
+.faq-item[open] .faq-question::after {
+    transform: rotate(45deg);
+}
+
+/* --- Halaman Kontak --- */
+.contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* 2 kolom */
+    gap: 3rem;
+    align-items: start;
+}
+.contact-info h3, .contact-info h4 {
+    margin-top: 0;
+}
+.contact-info p {
+    color: var(--text-color);
+    line-height: 1.7;
+    font-weight: normal;
+}
+.contact-divider {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+.contact-form-container .admin-form {
+    background-color: var(--light-gray);
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.contact-form-container .form-group {
+    display: grid;
+    grid-template-columns: 120px 1fr; /* Lebar label 120px, sisanya input */
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.contact-form-container .form-group label {
+    font-weight: bold;
+    text-align: right;
+    color: var(--dark-color);
+}
+
+.contact-form-container .form-group input[type="text"],
+.contact-form-container .form-group input[type="email"],
+.contact-form-container .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Wajib */
+}
+
+/* Khusus untuk textarea agar tidak sejajar */
+.contact-form-container .form-group label[for="message"] {
+    align-self: start; /* Pindahkan label "Pesan Anda" ke atas */
+}
 /* ==========================================================================
    5. Komponen (Tombol, Form, Alert)
    ========================================================================== */
@@ -1194,6 +1522,11 @@ footer {
     .footer-main {
         flex-direction: column;
     }
+
+    /* Halaman Kontak */
+    .contact-wrapper {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Ini adalah titik balik umum untuk ponsel */
@@ -1202,7 +1535,7 @@ footer {
     .mobile-nav-toggle {
         display: block;
     }
-    .primary-nav ul {
+    .primary-nav ul#primary-navigation { /* Dibuat lebih spesifik */
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
@@ -1222,6 +1555,23 @@ footer {
     .nav-dropdown:hover .dropdown-menu { display: none; }
     .dropdown-menu { display: none; }
     .dropdown-toggle::after { display: none; }
+    
+    /* Atur ulang cart icon di mobile */
+    .cart-icon-wrapper {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    .cart-icon {
+        font-size: 1em; /* Ikuti ukuran font induk */
+    }
+    .cart-badge {
+        position: static;
+        display: inline-flex;
+        margin-left: 8px;
+        top: 0;
+        right: 0;
+    }
 
     /* Login Page */
     .login-page-wrapper {
@@ -1243,4 +1593,136 @@ footer {
     .sponsor-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* ==========================================================================
+   Halaman Jadwal (Schedule)
+   ========================================================================== */
+
+.schedule-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.schedule-day-group {
+    margin-bottom: 3rem;
+}
+
+.schedule-day-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.schedule-stage-group {
+    margin-bottom: 2rem;
+}
+
+.schedule-stage-title {
+    font-size: 1.4rem;
+    color: var(--dark-color);
+    background-color: var(--light-gray);
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+}
+
+.schedule-item-list {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.schedule-item {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+}
+.schedule-item:last-child {
+    border-bottom: none;
+}
+.schedule-item:hover {
+    background-color: #fdfaf9;
+}
+
+.schedule-time {
+    flex-basis: 150px;
+    flex-shrink: 0;
+    padding: 1rem;
+    font-weight: bold;
+    background-color: var(--light-gray);
+    border-right: 1px solid #eee;
+}
+
+.schedule-artist {
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+/* ==========================================================================
+   Halaman Get Involved (Formulir)
+   ========================================================================== */
+.form-wrapper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.form-panel {
+    background-color: var(--light-gray);
+    padding: 2rem;
+    border-radius: 8px;
+}
+.form-panel .admin-form {
+    padding: 0;
+    background: none;
+}
+
+.form-panel .form-group input,
+.form-panel .form-group textarea {
+    background-color: #fff; /* Input-nya putih */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd; /* <-- SOLUSINYA ADA DI SINI */
+    border-radius: 5px;
+    box-sizing: border-box; /* Wajib */
+    font-size: 1rem;
+    font-family: inherit; /* Pakai font yang sama dengan body */
+}
+
+/* Tambahkan ini untuk efek 'focus' yang rapi */
+.form-panel .form-group input:focus,
+.form-panel .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(255, 99, 71, 0.2);
+}
+/* Responsif untuk Halaman Get Involved */
+@media (max-width: 992px) {
+    .form-wrapper-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-panel .form-group {
+    display: grid;
+    /* Lebar label 150px, sisanya input */
+    grid-template-columns: 150px 1fr; 
+    gap: 1rem;
+    align-items: center; /* Sejajarkan label & input secara vertikal */
+    margin-bottom: 1.5rem; /* Beri jarak antar baris */
+}
+
+.form-panel .form-group label {
+    font-weight: bold;
+    color: var(--dark-color);
+    text-align: left; 
+}
+
+/* Khusus untuk textarea, pindahkan labelnya ke atas */
+.form-panel .form-group label[for="vol_reason"] {
+    align-self: start; /* Labelnya nempel di atas */
 }

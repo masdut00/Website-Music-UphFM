@@ -1,9 +1,7 @@
 <?php
 
 session_start();
-
 require_once '../includes/db.php';
-
 
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['error_message'] = "Anda harus login untuk melihat detail tiket.";
@@ -14,20 +12,18 @@ if (!isset($_SESSION['user_id'])) {
 $ticket_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($ticket_id <= 0) { die("ID Tiket tidak valid."); }
 
-
+// (Logika pengambilan data Anda di sini sudah benar... )
 $stmt = $conn->prepare("SELECT category_name, price, description FROM tickets WHERE id = ?");
 $stmt->bind_param("i", $ticket_id);
 $stmt->execute();
 $ticket = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-
 $types_stmt = $conn->prepare("SELECT id, type_name FROM ticket_types WHERE ticket_id = ? ORDER BY id");
 $types_stmt->bind_param("i", $ticket_id);
 $types_stmt->execute();
 $ticket_types = $types_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $types_stmt->close();
-
 
 $images_stmt = $conn->prepare("SELECT image_url FROM ticket_images WHERE ticket_id = ? LIMIT 4");
 $images_stmt->bind_param("i", $ticket_id);
@@ -40,6 +36,15 @@ require_once '../includes/header.php';
 ?>
 
 <div class="container page-container">
+    
+    <?php 
+    // Tampilkan pesan sukses jika ada (DI SINI POSISI YANG BENAR)
+    if (isset($_SESSION['cart_message'])) {
+        echo '<div class="alert success"><p>' . htmlspecialchars($_SESSION['cart_message']) . '</p></div>';
+        unset($_SESSION['cart_message']);
+    }
+    ?>
+
     <?php if ($ticket): ?>
         <div class="product-page-wrapper">
             <div class="product-gallery">
@@ -63,7 +68,7 @@ require_once '../includes/header.php';
 
                 <form action="/upfm_web/process/tambah_keranjang.php" method="POST">
                     <input type="hidden" name="ticket_id" value="<?php echo $ticket_id; ?>">
-                    
+                    <input type="hidden" name="item_type" value="ticket">
                     <input type="hidden" name="type_name" id="type-name-input" value="<?php echo !empty($ticket_types) ? htmlspecialchars($ticket_types[0]['type_name']) : ''; ?>">
                     
                     <?php if (!empty($ticket_types)): ?>
@@ -110,22 +115,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const typeInput = document.getElementById('type-name-input');
 
     if (typeButtons.length > 0) {
-        
-        
         typeButtons.forEach(button => {
             button.addEventListener('click', function() {
-                
                 typeButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
-
-                
                 const selectedTypeName = this.getAttribute('data-type-name');
                 typeInput.value = selectedTypeName;
             });
         });
     }
 
-    
     const minusBtn = document.getElementById('minus-btn');
     const plusBtn = document.getElementById('plus-btn');
     const quantityInput = document.getElementById('quantity-input');
@@ -133,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (minusBtn && plusBtn && quantityInput) {
         minusBtn.addEventListener('click', function() {
             let currentVal = parseInt(quantityInput.value);
-            
             if (currentVal > 1) {
                 quantityInput.value = currentVal - 1;
             }
@@ -141,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         plusBtn.addEventListener('click', function() {
             let currentVal = parseInt(quantityInput.value);
-            
             quantityInput.value = currentVal + 1;
         });
     }

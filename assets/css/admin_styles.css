@@ -205,3 +205,86 @@ a { text-decoration: none; }
     border: 1px solid #ddd;
     border-radius: 5px;
 }
+
+.admin-form .form-group select,
+.admin-form .form-group input[type="date"],
+.admin-form .form-group input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+/* Grid 2-kolom untuk form */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.status-pending {
+    background-color: #f39c12; /* Oranye */
+    color: white;
+}
+.status-approved {
+    background-color: #2ecc71; /* Hijau */
+    color: white;
+}
+.status-rejected {
+    background-color: #e74c3c; /* Merah */
+    color: white;
+}
+
+.table-actions .btn-approve,
+.table-actions .btn-reject {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin: 2px;
+    display: inline-block;
+}
+.btn-approve {
+    background-color: #2ecc71; /* Hijau */
+}
+.btn-reject {
+    background-color: #e74c3c; /* Merah */
+}
+
+/* ==========================================================================
+   Admin - Gaya Edit Tiket
+   ========================================================================== */
+
+/* Membuat form tambah tipe jadi sebaris */
+.form-inline {
+    display: flex;
+    align-items: flex-end; /* Ratakan tombol dan input */
+    gap: 1rem;
+}
+
+.form-inline .form-group {
+    flex-grow: 1; /* Biarkan input mengambil sisa ruang */
+    margin-bottom: 0;
+}
+
+/* Tombol hapus kecil untuk tipe */
+.btn-delete-small {
+    background-color: #c0392b;
+    color: white;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+}
