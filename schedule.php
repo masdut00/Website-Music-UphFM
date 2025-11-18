@@ -3,7 +3,6 @@ require_once 'includes/db.php';
 $page_title = 'Jadwal Festival';
 require_once 'includes/header.php';
 
-// 1. Ambil semua data jadwal, gabungkan dengan nama Artis dan Panggung
 $sql = "SELECT 
             s.event_day, 
             s.start_time, 
@@ -21,12 +20,11 @@ $sql = "SELECT
             
 $raw_schedules = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
-// 2. Susun ulang data ke dalam array yang terkelompok
 $grouped_schedule = [];
 foreach ($raw_schedules as $schedule) {
     $day = $schedule['event_day'];
     $stage = $schedule['stage_name'];
-    $grouped_schedule[$day][$stage][] = $schedule; // Masukkan ke grup
+    $grouped_schedule[$day][$stage][] = $schedule;
 }
 ?>
 
