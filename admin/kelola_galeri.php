@@ -6,127 +6,144 @@ $page_title = 'Kelola Galeri Foto';
 $message = '';
 $message_type = '';
 
-// Logika hapus
+// --- 1. CEK FLASH MESSAGE ---
+if (isset($_SESSION['flash_message'])) {
+    $message = $_SESSION['flash_message'];
+    $message_type = $_SESSION['flash_type'];
+    unset($_SESSION['flash_message']);
+    unset($_SESSION['flash_type']);
+}
+
+// --- 2. LOGIKA HAPUS FOTO ---
 if (isset($_GET['action']) && $_GET['action'] == 'hapus' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];
     
-    // Ambil nama file gambar untuk dihapus dari server
+    // Ambil nama file gambar dulu sebelum hapus DB
     $stmt_img = $conn->prepare("SELECT media_url FROM gallery WHERE id = ?");
     $stmt_img->bind_param("i", $id_to_delete);
     $stmt_img->execute();
     $img = $stmt_img->get_result()->fetch_assoc();
-    $image_file_to_delete = $img['media_url'] ?? null;
     $stmt_img->close();
 
-    // Hapus data dari database
+    // Hapus Data Database
     $stmt = $conn->prepare("DELETE FROM gallery WHERE id = ?");
     $stmt->bind_param("i", $id_to_delete);
+    
     if ($stmt->execute()) {
-        if ($image_file_to_delete && file_exists('../assets/images/gallery/' . $image_file_to_delete)) {
-            unlink('../assets/images/gallery/' . $image_file_to_delete);
+        // Hapus File Fisik di Folder
+        if ($img && !empty($img['media_url'])) {
+            $path = '../assets/images/gallery/' . $img['media_url'];
+            if (file_exists($path)) { unlink($path); }
         }
-        $message = 'Gambar galeri berhasil dihapus!';
-        $message_type = 'success';
+        
+        $_SESSION['flash_message'] = 'Foto berhasil dihapus!';
+        $_SESSION['flash_type'] = 'success';
+        
+        // PENTING: Redirect kembali ke file ini (kelola_galeri.php)
+        header("Location: kelola_galeri.php");
+        exit();
     } else {
-        $message = 'Gagal menghapus gambar: ' . $stmt->error;
+        $message = 'Gagal menghapus: ' . $stmt->error;
         $message_type = 'error';
     }
-    $stmt->close();
 }
 
-// Ambil semua data galeri
+// --- 3. AMBIL DATA GALERI ---
 $gallery_items = $conn->query("SELECT * FROM gallery ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/admin_styles.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="../assets/css/admin_styles.css">
     <style>
-        /* CSS khusus untuk tampilan grid galeri di admin */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .gallery-item-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: relative;
-        }
-        .gallery-item-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            display: block;
-        }
-        .gallery-item-info {
-            padding: 10px;
-        }
-        .gallery-item-info h4 {
-            margin: 0 0 5px 0;
-            font-size: 1.1em;
-            color: var(--dark-color);
-        }
-        .gallery-item-info p {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        .gallery-item-actions {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px 10px;
-        }
-        .gallery-item-card .btn-edit,
-        .gallery-item-card .btn-delete {
-            padding: 5px 10px;
-            font-size: 0.8em;
-            text-align: center;
-        }
+        a { text-decoration: none; }
+        .dataTables_wrapper { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
+
 <div class="admin-wrapper">
     <?php require_once '../includes/admin_sidebar.php'; ?>
+    
     <div class="admin-main-content">
-        <div class="admin-header">
-            <h1 class="page-main-title">Kelola Galeri Foto</h1>
-            <a href="upload_gambar.php" class="btn-standard">Unggah Gambar Baru</a>
+        <div class="admin-header d-flex justify-content-between align-items-center mb-4">
+            <h1 class="page-main-title">Kelola Galeri</h1>
+            <a href="edit_gallery.php" class="btn btn-primary">Upload Foto Baru</a>
         </div>
 
         <?php if ($message): ?>
-            <div class="alert <?php echo $message_type; ?>"><p><?php echo $message; ?></p></div>
+            <div class="alert alert-<?php echo ($message_type == 'success') ? 'success' : 'danger'; ?> alert-dismissible fade show">
+                <?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         <?php endif; ?>
 
-        <?php if (!empty($gallery_items)): ?>
-            <div class="gallery-grid">
-                <?php foreach ($gallery_items as $item): ?>
-                    <div class="gallery-item-card">
-                        <img src="/upfm_web/assets/images/gallery/<?php echo htmlspecialchars($item['media_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
-                        <div class="gallery-item-info">
-                            <h4><?php echo htmlspecialchars($item['title']); ?></h4>
-                            <p>Jenis: <strong><?php echo htmlspecialchars($item['media_type']); ?></strong></p>
-                            <p style="font-size: 0.8em; color: #777;">Tahun: <?php echo htmlspecialchars($item['year']); ?></p>
-                        </div>
-                        <div class="gallery-item-actions">
-                            <a href="upload_gambar.php?id=<?php echo $item['id']; ?>" class="btn-edit">Edit</a>
-                            <a href="kelola_galeri.php?action=hapus&id=<?php echo $item['id']; ?>" class="btn-delete" onclick="return confirm('Anda yakin ingin menghapus gambar ini? Ini akan menghapus file fisiknya juga!');">Hapus</a>
-                        </div>
-                    </div>
+        <table id="galleryTable" class="table table-striped table-hover" style="width:100%">
+            <thead class="table-light">
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="10%">Preview</th>
+                    <th>Judul</th>
+                    <th>Nama Album</th>
+                    <th>Highlight?</th>
+                    <th width="15%">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $no = 1; foreach ($gallery_items as $item): ?>
+                    <tr>
+                        <td class="align-middle"><?php echo $no++; ?></td>
+                        <td class="align-middle">
+                            <img src="../assets/images/gallery/<?php echo htmlspecialchars($item['media_url']); ?>" 
+                                 class="table-thumbnail" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                        </td>
+                        <td class="align-middle"><strong><?php echo htmlspecialchars($item['title']); ?></strong></td>
+                        
+                        <td class="align-middle">
+                            <span class="badge bg-info text-dark">📂 <?php echo htmlspecialchars($item['album_name']); ?></span>
+                        </td>
+
+                        <td class="align-middle">
+                            <?php if ($item['is_highlight']): ?>
+                                <span class="badge bg-warning text-dark">⭐ Highlight</span>
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                        
+                        <td class="align-middle">
+                            <a href="edit_gallery.php?id=<?php echo $item['id']; ?>" class="btn btn-sm btn-warning text-white">Edit</a>
+                            
+                            <a href="kelola_galeri.php?action=hapus&id=<?php echo $item['id']; ?>" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Hapus foto ini?');">Hapus</a>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <p>Belum ada gambar di galeri. Silakan unggah yang pertama!</p>
-        <?php endif; ?>
+            </tbody>
+        </table>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#galleryTable').DataTable({
+            "language": {
+                "search": "Cari Foto:",
+                "paginate": { "next": ">", "previous": "<" }
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
