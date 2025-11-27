@@ -420,7 +420,7 @@ ul#primary-navigation {
 }
 .sponsor-logo {
     height: 70px;
-    background-color: var(--placeholder-gray);
+    /* background-color: var(--placeholder-gray); */
 }
 
 /* --- Explore Page --- */
