@@ -8,120 +8,187 @@ $is_edit_mode = ($schedule_id > 0);
 $message = '';
 $message_type = '';
 
+// Default values
+$artist_id = ''; 
+$stage_name = ''; // Kita pakai nama, bukan ID untuk tampilan
+$event_day = ''; 
+$start_time = ''; 
+$end_time = '';
+
+// --- 1. AMBIL DATA UNTUK DROPDOWN/LIST ---
 $artists = $conn->query("SELECT id, name FROM artists ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
-$stages = $conn->query("SELECT id, name FROM stages ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
+// Ambil nama panggung unik untuk saran (datalist)
+$existing_stages = $conn->query("SELECT DISTINCT name FROM stages ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
 
-$artist_id = ''; $stage_id = ''; $event_day = ''; $start_time = ''; $end_time = '';
-
+// --- 2. AMBIL DATA JADWAL JIKA EDIT ---
 if ($is_edit_mode) {
     $page_title = 'Edit Jadwal';
-    $stmt = $conn->prepare("SELECT * FROM schedules WHERE id = ?");
+    // Join ke tabel stages untuk mengambil nama panggungnya
+    $sql = "SELECT s.*, st.name as stage_name 
+            FROM schedules s 
+            LEFT JOIN stages st ON s.stage_id = st.id 
+            WHERE s.id = ?";
+    
+    $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $schedule_id);
     $stmt->execute();
     $schedule = $stmt->get_result()->fetch_assoc();
+    
     if ($schedule) {
         $artist_id = $schedule['artist_id'];
-        $stage_id = $schedule['stage_id'];
+        $stage_name = $schedule['stage_name']; // Nama panggung dari DB
         $event_day = $schedule['event_day'];
         $start_time = $schedule['start_time'];
         $end_time = $schedule['end_time'];
+    } else {
+        header("Location: kelola_jadwal.php");
+        exit();
     }
     $stmt->close();
 }
 
-// Logika Simpan Data (Create / Update)
+// --- 3. PROSES SIMPAN DATA ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $artist_id = $_POST['artist_id'];
-    $stage_id = $_POST['stage_id'];
+    $input_stage_name = trim($_POST['stage_name']); // Nama panggung yang diketik
     $event_day = $_POST['event_day'];
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
 
-    if ($is_edit_mode) {
-        $sql = "UPDATE schedules SET artist_id = ?, stage_id = ?, event_day = ?, start_time = ?, end_time = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iisssi", $artist_id, $stage_id, $event_day, $start_time, $end_time, $schedule_id);
-    } else {
-        $sql = "INSERT INTO schedules (artist_id, stage_id, event_day, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iisss", $artist_id, $stage_id, $event_day, $start_time, $end_time);
-    }
+    // --- LOGIKA PINTAR PANGGUNG (Stage) ---
+    // Cek apakah nama panggung ini sudah ada di tabel 'stages'?
+    $check_stage = $conn->prepare("SELECT id FROM stages WHERE name = ?");
+    $check_stage->bind_param("s", $input_stage_name);
+    $check_stage->execute();
+    $res_stage = $check_stage->get_result();
     
-    if ($stmt->execute()) {
-        header("Location: kelola_jadwal.php");
-        exit();
+    if ($res_stage->num_rows > 0) {
+        // Jika ADA: Ambil ID-nya
+        $row = $res_stage->fetch_assoc();
+        $final_stage_id = $row['id'];
     } else {
-        $message = 'Gagal menyimpan jadwal: ' . $stmt->error;
-        $message_type = 'error';
+        // Jika TIDAK ADA: Buat baru di tabel stages
+        $insert_stage = $conn->prepare("INSERT INTO stages (name) VALUES (?)");
+        $insert_stage->bind_param("s", $input_stage_name);
+        if ($insert_stage->execute()) {
+            $final_stage_id = $insert_stage->insert_id; // Ambil ID baru
+        } else {
+            $message = "Gagal membuat panggung baru.";
+            $message_type = "error";
+        }
+        $insert_stage->close();
     }
-    $stmt->close();
+    $check_stage->close();
+
+    // --- SIMPAN KE SCHEDULES ---
+    if (empty($message)) {
+        if ($is_edit_mode) {
+            $sql = "UPDATE schedules SET artist_id = ?, stage_id = ?, event_day = ?, start_time = ?, end_time = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iisssi", $artist_id, $final_stage_id, $event_day, $start_time, $end_time, $schedule_id);
+        } else {
+            $sql = "INSERT INTO schedules (artist_id, stage_id, event_day, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iisss", $artist_id, $final_stage_id, $event_day, $start_time, $end_time);
+        }
+        
+        if ($stmt->execute()) {
+            $_SESSION['flash_message'] = 'Jadwal berhasil disimpan!';
+            $_SESSION['flash_type'] = 'success';
+            header("Location: kelola_jadwal.php");
+            exit();
+        } else {
+            $message = 'Gagal menyimpan jadwal: ' . $stmt->error;
+            $message_type = 'error';
+        }
+        $stmt->close();
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin_styles.css"> 
 </head>
 <body>
+
 <div class="admin-wrapper">
     <?php require_once '../includes/admin_sidebar.php'; ?>
+    
     <div class="admin-main-content">
-        <h1 class="page-main-title"><?php echo $page_title; ?></h1>
-        <a href="kelola_jadwal.php" class="btn-back">← Kembali ke Daftar Jadwal</a>
+        <div class="admin-header">
+            <h1 class="page-main-title"><?php echo $page_title; ?></h1>
+            <a href="kelola_jadwal.php" class="btn-back">← Kembali</a>
+        </div>
 
         <?php if ($message): ?>
-            <div class="alert <?php echo $message_type; ?>"><p><?php echo $message; ?></p></div>
+            <div class="alert alert-error" style="background: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom:20px; color: #721c24;">
+                <?php echo $message; ?>
+            </div>
         <?php endif; ?>
 
-        <form class="admin-form" action="edit_jadwal.php?id=<?php echo $schedule_id; ?>" method="POST">
-            
-            <div class="form-group">
-                <label for="artist_id">Pilih Artis</label>
-                <select id="artist_id" name="artist_id" required>
-                    <option value="">-- Pilih Artis --</option>
-                    <?php foreach ($artists as $artist): ?>
-                        <option value="<?php echo $artist['id']; ?>" <?php echo ($artist_id == $artist['id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($artist['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="stage_id">Pilih Panggung</label>
-                <select id="stage_id" name="stage_id" required>
-                    <option value="">-- Pilih Panggung --</option>
-                    <?php foreach ($stages as $stage): ?>
-                        <option value="<?php echo $stage['id']; ?>" <?php echo ($stage_id == $stage['id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($stage['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="event_day">Hari/Tanggal</label>
-                <input type="date" id="event_day" name="event_day" value="<?php echo htmlspecialchars($event_day); ?>" required>
-            </div>
-
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label for="start_time">Jam Mulai</label>
-                    <input type="time" id="start_time" name="start_time" value="<?php echo htmlspecialchars($start_time); ?>" required>
+        <div class="card-admin" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <form class="admin-form" action="" method="POST">
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Pilih Artis</label>
+                    <select id="artist_id" name="artist_id" class="form-control" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                        <option value="">-- Pilih Artis --</option>
+                        <?php foreach ($artists as $artist): ?>
+                            <option value="<?php echo $artist['id']; ?>" <?php echo ($artist_id == $artist['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($artist['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label for="end_time">Jam Selesai</label>
-                    <input type="time" id="end_time" name="end_time" value="<?php echo htmlspecialchars($end_time); ?>" required>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Nama Panggung</label>
+                    
+                    <input type="text" 
+                           name="stage_name" 
+                           class="form-control" 
+                           list="stage_options" 
+                           value="<?php echo htmlspecialchars($stage_name); ?>" 
+                           placeholder="Pilih panggung atau ketik nama baru..." 
+                           required 
+                           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+
+                    <datalist id="stage_options">
+                        <?php foreach ($existing_stages as $stg): ?>
+                            <option value="<?php echo htmlspecialchars($stg['name']); ?>">
+                        <?php endforeach; ?>
+                    </datalist>
+                    
+                    <small style="color:#666; font-size:0.85em; margin-top:5px; display:block;">
+                        <i>Tips:</i> Ketik nama panggung baru untuk menambahkannya secara otomatis.
+                    </small>
                 </div>
-            </div>
-            
-            <button type="submit" class="btn-standard">Simpan Jadwal</button>
-        </form>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">Hari/Tanggal</label>
+                    <input type="date" id="event_day" name="event_day" class="form-control" value="<?php echo htmlspecialchars($event_day); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                </div>
+
+                <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label style="font-weight:bold; display:block; margin-bottom:5px;">Jam Mulai</label>
+                        <input type="time" id="start_time" name="start_time" class="form-control" value="<?php echo htmlspecialchars($start_time); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-weight:bold; display:block; margin-bottom:5px;">Jam Selesai</label>
+                        <input type="time" id="end_time" name="end_time" class="form-control" value="<?php echo htmlspecialchars($end_time); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-save" style="background: #007bff; color: white; border: none; padding: 12px 25px; border-radius: 5px; font-weight: bold; cursor: pointer;">Simpan Jadwal</button>
+            </form>
+        </div>
     </div>
 </div>
+
 </body>
 </html>
