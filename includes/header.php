@@ -1,4 +1,5 @@
 <?php
+// Hitung item keranjang
 $total_items_in_cart = 0;
 if (!empty($_SESSION['cart']['tickets'])) {
     $total_items_in_cart += count($_SESSION['cart']['tickets']);
@@ -14,18 +15,76 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' - UpFM' : 'UpFM Festival'; ?></title>
+    
     <link rel="stylesheet" href="/upfm_web/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* HEADER CONTAINER */
+        header {
+            position: relative; /* Agar canvas bisa absolute di dalamnya */
+            width: 100%;
+            height: 80px; /* Tinggi header fix */
+            background-color: #0f0f0f; /* Fallback color hitam */
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            overflow: hidden; /* Agar ombak tidak keluar header */
+        }
+
+        /* CANVAS BACKGROUND KHUSUS HEADER */
+        #header-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Di belakang logo & menu */
+            opacity: 0.8; /* Sedikit transparan agar elegan */
+        }
+
+        /* CONTAINER MENU (Agar di atas canvas) */
+        .header-container {
+            position: relative;
+            z-index: 2; /* Di atas canvas */
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Warna Teks Menu jadi Putih (Karena background gelap) */
+        .primary-nav a {
+            color: rgba(255,255,255,0.9) !important; 
+            font-weight: 600;
+        }
+        .primary-nav a:hover,
+        .primary-nav a.active {
+            color: white !important; /* <--- PASTIKAN INI ADA DAN WHITE */
+            opacity: 1;
+        }
+
+        /* Logo Link */
+        .logo-link { z-index: 2; }
+        
+        /* Ikon Cart & User jadi Putih */
+        .cart-icon, .fa-user-circle { color: white !important; }
+        .cart-icon-wrapper { background: rgba(255,255,255,0.2); }
+    </style>
 </head>
 <body>
 
-<header>
+<header id="main-header">
+    <canvas id="header-canvas"></canvas>
+
     <div class="container header-container">
         <a href="/upfm_web/index.php" class="logo-link">
-            <img src="/upfm_web/assets/images/logo.png" alt="UpFM Logo" class="logo">
+            <img src="/upfm_web/assets/images/logo.png" alt="UpFM Logo" class="logo" style="filter: brightness(0) invert(1);"> 
         </a>
         
-        <button class="mobile-nav-toggle" aria-controls="primary-navigation" aria-expanded="false">
+        <button class="mobile-nav-toggle" aria-controls="primary-navigation" aria-expanded="false" style="filter: invert(1);">
             <span class="sr-only">Menu</span>
         </button>
 
@@ -38,26 +97,27 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
                 <li><a href="/upfm_web/schedule.php" class="<?php echo ($current_page == 'schedule.php') ? 'active' : ''; ?>">JADWAL</a></li>
                 <li><a href="/upfm_web/journal.php" class="<?php echo ($current_page == 'journal.php' || $current_page == 'baca_artikel.php') ? 'active' : ''; ?>">JOURNAL</a></li>
                 <li><a href="/upfm_web/gallery.php" class="<?php echo ($current_page == 'gallery.php') ? 'active' : ''; ?>">GALLERY</a></li>
-                <li><a href="/upfm_web/get_involved.php" class="<?php echo ($current_page == 'get_involved.php' || $current_page == 'contact.php') ? 'active' : ''; ?>">GET INVOLVED</a></li>
+                <li><a href="/upfm_web/get_involved.php" class="<?php echo ($current_page == 'get_involved.php' || $current_page == 'contact.php') ? 'active' : ''; ?>">JOIN US</a></li>
 
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li class="nav-dropdown">
-                        <a href="#" class="dropdown-toggle">
-                            <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong>
+                        <a href="#" class="dropdown-toggle" style="display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-user-circle" style="font-size:1.2rem;"></i>
+                            <span><?php echo htmlspecialchars(strtok($_SESSION['user_name'], " ")); ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="/upfm_web/account/my_account.php">Akun Saya</a></li>
-                            <li><a href="/upfm_web/account/my_tickets.php">Tiket Saya</a></li>
-                            <li><a href="/upfm_web/auth/logout.php">Logout</a></li>
+                            <li><a href="/upfm_web/account/my_account.php" style="color:#333 !important;">Akun Saya</a></li>
+                            <li><a href="/upfm_web/account/my_tickets.php" style="color:#333 !important;">Tiket Saya</a></li>
+                            <li style="border-top:1px solid #eee;"><a href="/upfm_web/auth/logout.php" style="color:red !important;">Logout</a></li>
                         </ul>
                     </li>
                 <?php else: ?>
-                    <li><a href="/upfm_web/auth/login.php" class="btn-nav-login">LOGIN</a></li>
+                    <li><a href="/upfm_web/auth/login.php" class="btn-nav-login" style="background:white !important; color:black !important;">LOGIN</a></li>
                 <?php endif; ?>
 
                 <li>
                     <a href="/upfm_web/account/keranjang.php" class="cart-icon-wrapper">
-                        <span class="cart-icon">&#128722;</span>
+                        <i class="fas fa-shopping-cart cart-icon"></i>
                         <?php if ($total_items_in_cart > 0): ?>
                             <span class="cart-badge"><?php echo $total_items_in_cart; ?></span>
                         <?php endif; ?>
@@ -67,4 +127,93 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
         </nav>
     </div>
 </header>
+
 <main>
+
+<script>
+    const canvas = document.getElementById('header-canvas');
+    const ctx = canvas.getContext('2d');
+    const header = document.getElementById('main-header');
+
+    let width, height;
+    let waves = [];
+
+    // Warna Ombak (Hitam ke Orange)
+    const colors = [
+        ['rgba(0, 0, 0, 1)', 'rgba(20, 20, 20, 1)'],       // Base Gelap
+        ['rgba(255, 69, 0, 0.4)', 'rgba(0, 0, 0, 0)'],     // Orange-Merah
+        ['rgba(255, 140, 0, 0.3)', 'rgba(0, 0, 0, 0)']     // Orange Terang
+    ];
+
+    function resize() {
+        width = canvas.width = header.offsetWidth;
+        height = canvas.height = header.offsetHeight;
+    }
+
+    class Wave {
+        constructor(color, yOffset, speed, amplitude) {
+            this.color = color;
+            this.yOffset = yOffset;
+            this.speed = speed;
+            this.amplitude = amplitude;
+            this.frequency = 0.02; 
+            this.phase = Math.random() * Math.PI * 2;
+        }
+
+        draw(ctx, time) {
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+
+            for (let x = 0; x <= width; x += 5) {
+                const y = Math.sin(x * this.frequency + time * this.speed + this.phase) * this.amplitude 
+                          + (height * this.yOffset);
+                ctx.lineTo(x, y);
+            }
+
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(0, 0, width, 0); // Horizontal Gradient
+            gradient.addColorStop(0, this.color[0]);
+            gradient.addColorStop(1, this.color[1]);
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+    }
+
+    function init() {
+        resize();
+        waves = [];
+        // Setup Ombak agar pas di header pendek
+        waves.push(new Wave(colors[0], 0.5, 0.02, 15)); 
+        waves.push(new Wave(colors[1], 0.6, 0.03, 10)); 
+        waves.push(new Wave(colors[2], 0.7, 0.04, 8)); 
+    }
+
+    let time = 0;
+    function animate() {
+        ctx.fillStyle = '#111'; // Warna dasar header
+        ctx.fillRect(0, 0, width, height);
+        
+        time += 0.5;
+        waves.forEach(wave => wave.draw(ctx, time));
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    init();
+    animate();
+
+    // Mobile Toggle
+    const navToggle = document.querySelector('.mobile-nav-toggle');
+    const primaryNav = document.querySelector('.primary-nav ul');
+    if(navToggle) {
+        navToggle.addEventListener('click', () => {
+            const visibility = primaryNav.getAttribute('data-visible');
+            primaryNav.setAttribute('data-visible', visibility === "false" ? true : false);
+            navToggle.setAttribute('aria-expanded', visibility === "false" ? true : false);
+        });
+    }
+</script>

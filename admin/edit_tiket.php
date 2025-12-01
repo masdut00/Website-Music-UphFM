@@ -205,7 +205,7 @@ if ($is_edit_mode) {
                     <?php endif; ?>
                 </div>
                 
-                <form action="upload_gambar_tiket.php?id=<?php echo $ticket_id; ?>" method="POST" enctype="multipart/form-data" class="form-inline">
+                <form action="upload_gambar.php?id=<?php echo $ticket_id; ?>" method="POST" enctype="multipart/form-data" class="form-inline">
                     <div class="form-group">
                         <label for="images">Tambah Gambar Baru:</label>
                         <input type="file" id="images" name="images[]" multiple accept="image/*">
