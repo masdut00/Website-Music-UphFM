@@ -20,59 +20,6 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        /* HEADER CONTAINER */
-        header {
-            position: relative; /* Agar canvas bisa absolute di dalamnya */
-            width: 100%;
-            height: 80px; /* Tinggi header fix */
-            background-color: #0f0f0f; /* Fallback color hitam */
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            overflow: hidden; /* Agar ombak tidak keluar header */
-        }
-
-        /* CANVAS BACKGROUND KHUSUS HEADER */
-        #header-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0; /* Di belakang logo & menu */
-            opacity: 0.8; /* Sedikit transparan agar elegan */
-        }
-
-        /* CONTAINER MENU (Agar di atas canvas) */
-        .header-container {
-            position: relative;
-            z-index: 2; /* Di atas canvas */
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Warna Teks Menu jadi Putih (Karena background gelap) */
-        .primary-nav a {
-            color: rgba(255,255,255,0.9) !important; 
-            font-weight: 600;
-        }
-        .primary-nav a:hover,
-        .primary-nav a.active {
-            color: white !important; /* <--- PASTIKAN INI ADA DAN WHITE */
-            opacity: 1;
-        }
-
-        /* Logo Link */
-        .logo-link { z-index: 2; }
-        
-        /* Ikon Cart & User jadi Putih */
-        .cart-icon, .fa-user-circle { color: white !important; }
-        .cart-icon-wrapper { background: rgba(255,255,255,0.2); }
-    </style>
 </head>
 <body>
 
