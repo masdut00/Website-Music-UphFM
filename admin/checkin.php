@@ -6,12 +6,13 @@ $page_title = 'Validasi Tiket (Check-In)';
 $result_msg = '';
 $result_type = ''; // success, error, warning
 $ticket_data = null;
+$audio_file = ''; // Untuk suara beep
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = trim($_POST['ticket_code']);
 
     if (!empty($code)) {
-        // 1. Cari Tiket di Database
+        // 1. Cari Tiket
         $stmt = $conn->prepare("
             SELECT tp.*, u.full_name, t.category_name 
             FROM ticket_purchases tp
@@ -28,33 +29,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 2. Cek Status Pembayaran
             if ($ticket_data['payment_status'] !== 'success') {
-                $result_msg = "⛔ TIKET BELUM LUNAS! Status: " . strtoupper($ticket_data['payment_status']);
+                $result_msg = "⛔ TIKET BELUM LUNAS";
                 $result_type = 'error';
+                $audio_file = 'error.mp3';
             } 
-            // 3. Cek Apakah Sudah Masuk Sebelumnya
+            // 3. Cek Apakah Sudah Masuk
             elseif ($ticket_data['is_checked_in'] == 1) {
-                $result_msg = "⚠️ PERINGATAN: Tiket Sudah Dipakai Masuk pada: " . $ticket_data['checkin_time'];
+                $result_msg = "⚠️ SUDAH DIPAKAI";
                 $result_type = 'warning';
+                $audio_file = 'warning.mp3';
             } 
-            // 4. LOLOS VALIDASI -> Update Database
+            // 4. LOLOS VALIDASI
             else {
                 $update = $conn->prepare("UPDATE ticket_purchases SET is_checked_in = 1, checkin_time = NOW() WHERE id = ?");
                 $update->bind_param("i", $ticket_data['id']);
                 
                 if ($update->execute()) {
-                    $result_msg = "✅ VALID! Silakan Masuk.";
+                    $result_msg = "✅ VALID! SILAKAN MASUK";
                     $result_type = 'success';
-                    // Update data tampilan agar terlihat sudah checkin
                     $ticket_data['is_checked_in'] = 1;
                     $ticket_data['checkin_time'] = date('Y-m-d H:i:s');
+                    $audio_file = 'success.mp3';
                 } else {
-                    $result_msg = "Error sistem: Gagal update database.";
+                    $result_msg = "Error Database";
                     $result_type = 'error';
                 }
             }
         } else {
-            $result_msg = "❌ KODE TIDAK DITEMUKAN!";
+            $result_msg = "❌ KODE TIDAK DITEMUKAN";
             $result_type = 'error';
+            $audio_file = 'error.mp3';
         }
     }
 }
@@ -65,46 +69,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title><?php echo $page_title; ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/admin_styles.css">
+    
     <style>
-        .checkin-box {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 40px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .input-code {
-            font-size: 1.5rem;
-            padding: 15px;
-            text-align: center;
-            width: 100%;
-            border: 2px solid #333;
-            border-radius: 8px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-        }
-        .result-box {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 8px;
-            color: white;
-        }
-        .res-success { background-color: #2ecc71; } /* Hijau */
-        .res-error { background-color: #e74c3c; }   /* Merah */
-        .res-warning { background-color: #f39c12; } /* Kuning */
+        body { background-color: #f0f2f5; }
         
-        .ticket-info {
-            text-align: left;
-            background: #f9f9f9;
+        .checkin-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        .checkin-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .scan-icon {
+            font-size: 4rem;
+            color: #333;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .form-control-lg {
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+        .form-control-lg:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* Result Styles */
+        .result-card {
+            margin-top: 30px;
+            border-radius: 12px;
+            padding: 30px;
+            color: white;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .res-success { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .res-error   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .res-warning { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #333; }
+
+        .res-icon { font-size: 3rem; margin-bottom: 10px; }
+        .res-title { font-weight: 800; font-size: 1.8rem; margin: 0; text-transform: uppercase; }
+
+        .ticket-details {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
-            border-radius: 8px;
-            color: #333;
+            text-align: left;
         }
+        .ticket-details p { margin-bottom: 8px; font-size: 1.1rem; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .ticket-details p:last-child { border-bottom: none; }
+        .ticket-details strong { width: 140px; display: inline-block; color: #555; }
     </style>
 </head>
 <body>
@@ -113,40 +154,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php require_once '../includes/admin_sidebar.php'; ?>
     
     <div class="admin-main-content">
-        <div class="admin-header">
-            <h1 class="page-main-title">Validasi Tiket (Gatekeeper)</h1>
-        </div>
-
-        <div class="checkin-box">
-            <h3>Scan / Input Kode Tiket</h3>
-            <p>Gunakan barcode scanner atau ketik manual.</p>
+        <div class="checkin-container">
             
-            <form method="POST" action="">
-                <input type="text" name="ticket_code" class="input-code" placeholder="UPFM-T-XXX..." autofocus autocomplete="off">
-                <button type="submit" class="btn-standard" style="width:100%; font-size:1.2rem;">CEK TIKET</button>
-            </form>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold m-0"><i class="fas fa-qrcode text-primary"></i> Gatekeeper</h2>
+                <span class="badge bg-dark"><?php echo date('d M Y'); ?></span>
+            </div>
 
-            <?php if ($result_msg): ?>
-                <div class="result-box res-<?php echo $result_type; ?>">
-                    <h2 style="margin:0;"><?php echo $result_msg; ?></h2>
-                </div>
+            <div class="checkin-card">
+                <i class="fas fa-barcode scan-icon"></i>
+                <h4 class="mb-3">Scan Barcode Tiket</h4>
+                
+                <form method="POST" action="" autocomplete="off">
+                    <div class="mb-3">
+                        <input type="text" name="ticket_code" class="form-control form-control-lg" placeholder="SCAN DISINI..." autofocus onblur="this.focus()">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold">CEK VALIDASI</button>
+                </form>
 
-                <?php if ($ticket_data): ?>
-                    <div class="ticket-info">
-                        <p><strong>Nama Pengunjung:</strong> <?php echo htmlspecialchars($ticket_data['full_name']); ?></p>
-                        <p><strong>Kategori Tiket:</strong> <?php echo htmlspecialchars($ticket_data['category_name']); ?></p>
-                        <p><strong>Jumlah:</strong> <?php echo $ticket_data['quantity']; ?> Orang</p>
-                        <p><strong>Waktu Pembelian:</strong> <?php echo $ticket_data['created_at']; ?></p>
-                        <?php if($ticket_data['is_checked_in']): ?>
-                            <p style="color:red; font-weight:bold;">Waktu Check-in: <?php echo $ticket_data['checkin_time']; ?></p>
+                <?php if ($result_msg): ?>
+                    <div class="result-card res-<?php echo $result_type; ?>">
+                        <?php 
+                            $icon = ($result_type == 'success') ? 'fa-check-circle' : (($result_type == 'warning') ? 'fa-exclamation-triangle' : 'fa-times-circle');
+                        ?>
+                        <i class="fas <?php echo $icon; ?> res-icon"></i>
+                        <h2 class="res-title"><?php echo $result_msg; ?></h2>
+
+                        <?php if ($ticket_data): ?>
+                            <div class="ticket-details">
+                                <p><strong>Nama:</strong> <?php echo htmlspecialchars($ticket_data['full_name']); ?></p>
+                                <p><strong>Kategori:</strong> <?php echo htmlspecialchars($ticket_data['category_name']); ?></p>
+                                <p><strong>Jumlah:</strong> <span class="badge bg-primary fs-6"><?php echo $ticket_data['quantity']; ?> Orang</span></p>
+                                
+                                <?php if($ticket_data['is_checked_in']): ?>
+                                    <p class="text-danger fw-bold m-0">
+                                        <i class="fas fa-clock"></i> Masuk: <?php echo date('H:i:s', strtotime($ticket_data['checkin_time'])); ?>
+                                    </p>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
-            <?php endif; ?>
-        </div>
 
+            </div>
+            
+            <div class="text-center mt-3 text-muted">
+                <small>Pastikan kursor selalu aktif di kolom input (Auto Focus)</small>
+            </div>
+
+        </div>
     </div>
 </div>
+
+<script>
+    // Memaksa fokus ke input field agar scanner barcode langsung terbaca
+    document.addEventListener("click", function() {
+        document.querySelector("input[name='ticket_code']").focus();
+    });
+</script>
 
 </body>
 </html>

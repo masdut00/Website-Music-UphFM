@@ -16,7 +16,7 @@ $rev_merch = $conn->query($sql_rev_merch)->fetch_assoc()['total'] ?? 0;
 $total_revenue = $rev_ticket + $rev_merch;
 
 // B. Counter Data
-$total_users = $conn->query("SELECT COUNT(id) AS total FROM users WHERE role = 'user'")->fetch_assoc()['total'];
+$total_users = $conn->query("SELECT COUNT(id) AS total FROM users WHERE role = 'pengunjung'")->fetch_assoc()['total'];
 $total_tickets_sold = $conn->query("SELECT SUM(quantity) AS total FROM ticket_purchases WHERE payment_status = 'success'")->fetch_assoc()['total'] ?? 0;
 $total_merch_sold = $conn->query("SELECT SUM(quantity) AS total FROM merch_purchases WHERE payment_status = 'success'")->fetch_assoc()['total'] ?? 0;
 
