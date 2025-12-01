@@ -8,75 +8,97 @@ $is_edit_mode = ($ticket_id > 0);
 $message = '';
 $message_type = '';
 
-//hapus tiket
-if (isset($_GET['hapus_tipe'])) {
-    $type_id_to_delete = (int)$_GET['hapus_tipe'];
-    $stmt_del = $conn->prepare("DELETE FROM ticket_types WHERE id = ? AND ticket_id = ?");
-    $stmt_del->bind_param("ii", $type_id_to_delete, $ticket_id);
-    if ($stmt_del->execute()) {
-        $message = 'Tipe tiket berhasil dihapus.'; $message_type = 'success';
-    } else {
-        $message = 'Gagal menghapus tipe.'; $message_type = 'error';
+// --- LOGIKA HAPUS GAMBAR ---
+if (isset($_GET['hapus_gambar'])) {
+    $img_id = (int)$_GET['hapus_gambar'];
+    
+    // Ambil nama file dulu
+    $stmt = $conn->prepare("SELECT image_url FROM ticket_images WHERE id = ?");
+    $stmt->bind_param("i", $img_id);
+    $stmt->execute();
+    $img_data = $stmt->get_result()->fetch_assoc();
+    
+    if ($img_data) {
+        // Hapus dari DB
+        $conn->query("DELETE FROM ticket_images WHERE id = $img_id");
+        // Hapus file fisik
+        if (file_exists("../assets/images/tickets/" . $img_data['image_url'])) {
+            unlink("../assets/images/tickets/" . $img_data['image_url']);
+        }
+        $message = "Gambar berhasil dihapus.";
+        $message_type = "success";
     }
 }
 
-//simpan data
+// --- LOGIKA SIMPAN DATA (POST) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // simpan tiket utama
-    if (isset($_POST['simpan_tiket'])) {
-        $category_name = $_POST['category_name'];
-        $filter_tag = $_POST['filter_tag'];
-        $price = $_POST['price'];
-        $quantity_available = $_POST['quantity_available'];
-        $description = $_POST['description'];
+    // 1. Simpan Data Utama Tiket
+    $category_name = $_POST['category_name'];
+    $filter_tag = $_POST['filter_tag'];
+    $price = $_POST['price'];
+    $quantity_available = $_POST['quantity_available'];
+    $description = $_POST['description'];
 
-        if ($is_edit_mode) {
-            $sql = "UPDATE tickets SET category_name = ?, filter_tag = ?, price = ?, quantity_available = ?, description = ? WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssdisi", $category_name, $filter_tag, $price, $quantity_available, $description, $ticket_id);
-        } else {
-            $sql = "INSERT INTO tickets (category_name, filter_tag, price, quantity_available, description) VALUES (?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssdis", $category_name, $filter_tag, $price, $quantity_available, $description);
+    if ($is_edit_mode) {
+        $sql = "UPDATE tickets SET category_name = ?, filter_tag = ?, price = ?, quantity_available = ?, description = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssdisi", $category_name, $filter_tag, $price, $quantity_available, $description, $ticket_id);
+    } else {
+        $sql = "INSERT INTO tickets (category_name, filter_tag, price, quantity_available, description) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssdis", $category_name, $filter_tag, $price, $quantity_available, $description);
+    }
+    
+    if ($stmt->execute()) {
+        if (!$is_edit_mode) {
+            $ticket_id = $stmt->insert_id; // Ambil ID baru jika insert
+            $is_edit_mode = true;
+        }
+        $message = 'Data tiket berhasil disimpan!';
+        $message_type = 'success';
+        
+        // 2. Proses Upload Gambar (JIKA ADA)
+        if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+            $total_files = count($_FILES['images']['name']);
+            $target_dir = "../assets/images/tickets/";
+            
+            // Buat folder jika belum ada
+            if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+
+            for ($i = 0; $i < $total_files; $i++) {
+                $file_name = $_FILES['images']['name'][$i];
+                $file_tmp = $_FILES['images']['tmp_name'][$i];
+                $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+                
+                // Rename file agar unik
+                $new_file_name = time() . "_" . uniqid() . "." . $file_ext;
+                $target_file = $target_dir . $new_file_name;
+                
+                if (move_uploaded_file($file_tmp, $target_file)) {
+                    // Simpan ke tabel ticket_images
+                    $stmt_img = $conn->prepare("INSERT INTO ticket_images (ticket_id, image_url) VALUES (?, ?)");
+                    $stmt_img->bind_param("is", $ticket_id, $new_file_name);
+                    $stmt_img->execute();
+                }
+            }
         }
         
-        if ($stmt->execute()) {
-            $message = 'Data tiket berhasil disimpan!'; $message_type = 'success';
-            if (!$is_edit_mode) {
-                $new_id = $stmt->insert_id;
-                header("Location: edit_tiket.php?id=$new_id");
-                exit();
-            }
-        } else {
-            $message = 'Gagal menyimpan data tiket: ' . $stmt->error; $message_type = 'error';
-        }
-        $stmt->close();
+    } else {
+        $message = 'Gagal menyimpan: ' . $stmt->error;
+        $message_type = 'error';
     }
-
-    // tambah tipe baru
-    if (isset($_POST['tambah_tipe'])) {
-        $type_name = $_POST['type_name'];
-        if (!empty($type_name) && $is_edit_mode) {
-            $sql = "INSERT INTO ticket_types (ticket_id, type_name) VALUES (?, ?)";
-            $stmt_add = $conn->prepare($sql);
-            $stmt_add->bind_param("is", $ticket_id, $type_name);
-            if ($stmt_add->execute()) {
-                $message = 'Tipe baru berhasil ditambahkan!'; $message_type = 'success';
-            } else {
-                $message = 'Gagal menambah tipe: ' . $stmt_add->error; $message_type = 'error';
-            }
-        }
-    }
+    $stmt->close();
 }
 
+// --- AMBIL DATA ---
 $category_name = ''; $filter_tag = ''; $price = ''; $quantity_available = ''; $description = '';
 $current_images = [];
-$current_types = [];
 
-// Ambil data tiket utama
 if ($is_edit_mode) {
     $page_title = 'Edit Tiket';
+    
+    // Data Utama
     $stmt = $conn->prepare("SELECT * FROM tickets WHERE id = ?");
     $stmt->bind_param("i", $ticket_id);
     $stmt->execute();
@@ -88,134 +110,98 @@ if ($is_edit_mode) {
         $quantity_available = $ticket['quantity_available'];
         $description = $ticket['description'];
     }
-    $stmt->close();
-
-    // Ambil gambar yang sudah ada
+    
+    // Data Gambar
     $img_stmt = $conn->prepare("SELECT id, image_url FROM ticket_images WHERE ticket_id = ?");
     $img_stmt->bind_param("i", $ticket_id);
     $img_stmt->execute();
     $current_images = $img_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
-    // Ambil TIPE TIKET yang udah ada
-    $types_stmt = $conn->prepare("SELECT id, type_name FROM ticket_types WHERE ticket_id = ?");
-    $types_stmt->bind_param("i", $ticket_id);
-    $types_stmt->execute();
-    $current_types = $types_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/admin_styles.css"> 
 </head>
 <body>
+
 <div class="admin-wrapper">
     <?php require_once '../includes/admin_sidebar.php'; ?>
+    
     <div class="admin-main-content">
-        <h1 class="page-main-title"><?php echo $page_title; ?></h1>
-        <a href="kelola_tiket.php" class="btn-back">← Kembali ke Daftar Tiket</a>
+        <div class="admin-header">
+            <h1 class="page-main-title"><?php echo $page_title; ?></h1>
+            <a href="kelola_tiket.php" class="btn-back">← Kembali</a>
+        </div>
 
         <?php if ($message): ?>
-            <div class="alert <?php echo $message_type; ?>"><p><?php echo $message; ?></p></div>
+            <div class="alert alert-<?php echo ($message_type == 'success') ? 'success' : 'error'; ?>" style="background: <?php echo ($message_type == 'success') ? '#d4edda' : '#f8d7da'; ?>; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <?php echo $message; ?>
+            </div>
         <?php endif; ?>
 
-        <form class="admin-form" action="edit_tiket.php?id=<?php echo $ticket_id; ?>" method="POST" enctype="multipart/form-data">
-            <h2 class="panel-title">Detail Tiket Utama</h2>
-            <div class="form-group">
-                <label for="category_name">Nama Tiket</label>
-                <input type="text" id="category_name" name="category_name" value="<?php echo htmlspecialchars($category_name); ?>" required>
-            </div>
-            
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label for="filter_tag">Tag Filter (explore page)</label>
-                    <select id="filter_tag" name="filter_tag">
-                        <option value="presale" <?php echo ($filter_tag == 'presale') ? 'selected' : ''; ?>>Presale</option>
-                        <option value="day1" <?php echo ($filter_tag == 'day1') ? 'selected' : ''; ?>>Day 1</option>
-                        <option value="day2" <?php echo ($filter_tag == 'day2') ? 'selected' : ''; ?>>Day 2</option>
-                        <option value="all-access" <?php echo ($filter_tag == 'all-access') ? 'selected' : ''; ?>>All-Access (2 Hari)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="price">Harga Dasar (contoh: 125000)</label>
-                    <input type="number" step="1000" id="price" name="price" value="<?php echo htmlspecialchars($price); ?>">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="quantity_available">Stok (Total)</label>
-                <input type="number" id="quantity_available" name="quantity_available" value="<?php echo htmlspecialchars($quantity_available); ?>">
-            </div>
-
-            <div class="form-group">
-                <label for="description">Deskripsi</label>
-                <textarea id="description" name="description" rows="5"><?php echo htmlspecialchars($description); ?></textarea>
-            </div>
-            
-            <button type="submit" name="simpan_tiket" class="btn-standard">Simpan Perubahan Tiket</button>
-        </form>
-
-        <?php if ($is_edit_mode): ?>
-            
-            <div class="admin-form" style="margin-top: 2rem;">
-                <h2 class="panel-title">Kelola Tipe Tiket (Regular, VIP, dll)</h2>
+        <div class="card-admin" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <form action="" method="POST" enctype="multipart/form-data">
                 
-                <table class="admin-table" style="margin-bottom: 1.5rem;">
-                    <thead><tr><th>Tipe yang Terdaftar</th><th>Aksi</th></tr></thead>
-                    <tbody>
-                        <?php if (empty($current_types)): ?>
-                            <tr><td colspan="2">Belum ada tipe. Tambahkan di bawah.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($current_types as $type): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($type['type_name']); ?></td>
-                                    <td>
-                                        <a href="edit_tiket.php?id=<?php echo $ticket_id; ?>&hapus_tipe=<?php echo $type['id']; ?>" class="btn-delete-small" onclick="return confirm('Hapus tipe ini?');">Hapus</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-
-                <form action="edit_tiket.php?id=<?php echo $ticket_id; ?>" method="POST" class="form-inline">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block;">Nama Kategori Tiket</label>
+                    <input type="text" name="category_name" class="form-control" value="<?php echo htmlspecialchars($category_name); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                </div>
+                
+                <div class="form-grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label for="type_name">Tambah Tipe Baru:</label>
-                        <input type="text" id="type_name" name="type_name" placeholder="Misal: VVIP" required>
+                        <label style="font-weight:bold; display:block;">Filter Tag (Grup)</label>
+                        <select name="filter_tag" class="form-control" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                            <option value="presale" <?php echo ($filter_tag == 'presale') ? 'selected' : ''; ?>>Presale</option>
+                            <option value="day1" <?php echo ($filter_tag == 'day1') ? 'selected' : ''; ?>>Day 1</option>
+                            <option value="day2" <?php echo ($filter_tag == 'day2') ? 'selected' : ''; ?>>Day 2</option>
+                            <option value="all-access" <?php echo ($filter_tag == 'all-access') ? 'selected' : ''; ?>>All-Access</option>
+                        </select>
                     </div>
-                    <button type="submit" name="tambah_tipe" class="btn-standard">Tambah Tipe</button>
-                </form>
-            </div>
+                    <div class="form-group">
+                        <label style="font-weight:bold; display:block;">Harga (Rp)</label>
+                        <input type="number" name="price" class="form-control" value="<?php echo htmlspecialchars($price); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                    </div>
+                </div>
 
-            <div class="admin-form" style="margin-top: 2rem;">
-                <h2 class="panel-title">Kelola Gambar Tiket</h2>
-                <div class="current-images-grid">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block;">Stok Tiket</label>
+                    <input type="number" name="quantity_available" class="form-control" value="<?php echo htmlspecialchars($quantity_available); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight:bold; display:block;">Deskripsi / Benefit Tiket</label>
+                    <textarea name="description" rows="4" class="form-control" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;"><?php echo htmlspecialchars($description); ?></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                    <label style="font-weight:bold; display:block; margin-bottom: 10px;">Gambar Tiket</label>
+                    
                     <?php if (!empty($current_images)): ?>
-                        <?php foreach ($current_images as $img): ?>
-                            <div class="current-image-item">
-                                <img src="/upfm_web/assets/images/tickets/<?php echo $img['image_url']; ?>" class="table-thumbnail">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                            <?php foreach ($current_images as $img): ?>
+                                <div style="position: relative; display: inline-block;">
+                                    <img src="../assets/images/tickets/<?php echo $img['image_url']; ?>" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd;">
+                                    <a href="edit_tiket.php?id=<?php echo $ticket_id; ?>&hapus_gambar=<?php echo $img['id']; ?>" 
+                                       onclick="return confirm('Hapus gambar ini?');"
+                                       style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; text-decoration: none; font-size: 12px;">&times;</a>
                                 </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>Belum ada gambar.</p>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
+
+                    <input type="file" name="images[]" multiple accept="image/*" class="form-control">
+                    <small style="color: #666;">Bisa pilih lebih dari 1 file sekaligus.</small>
                 </div>
                 
-                <form action="upload_gambar.php?id=<?php echo $ticket_id; ?>" method="POST" enctype="multipart/form-data" class="form-inline">
-                    <div class="form-group">
-                        <label for="images">Tambah Gambar Baru:</label>
-                        <input type="file" id="images" name="images[]" multiple accept="image/*">
-                    </div>
-                    <button type="submit" class="btn-standard">Upload Gambar</button>
-                </form>
-            </div>
-
-        <?php endif; ?>
+                <button type="submit" class="btn-save" style="background: #007bff; color: white; border: none; padding: 12px 30px; border-radius: 5px; font-weight: bold; cursor: pointer;">Simpan Tiket</button>
+            </form>
+        </div>
     </div>
 </div>
+
 </body>
 </html>

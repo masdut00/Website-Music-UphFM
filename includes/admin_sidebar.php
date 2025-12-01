@@ -51,9 +51,11 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
         <a href="lihat_pendaftar.php" class="nav-item <?php echo ($current_page == 'lihat_pendaftar.php') ? 'active' : ''; ?>">
             Lihat Pendaftar
         </a>
+        <a href="checkin.php" class="nav-item <?php echo ($current_page == 'checkin.php') ? 'active' : ''; ?>" style="background-color: #e74c3c; color: white;"><i class="fas fa-qrcode me-2"></i>
+            Validasi Tiket (Scan)
+       </a>
 
         <span class="nav-separator">Lainnya</span>
-        <a href="#" class="nav-item">Pendaftar Volunteer</a>
         <a href="/upfm_web/index.php" class="nav-item nav-item-extra" target="_blank">Lihat Website</a>
         <a href="/upfm_web/auth/logout.php" class="nav-item nav-item-extra">Logout</a>
     </nav>

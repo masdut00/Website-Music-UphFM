@@ -140,7 +140,7 @@ $merch_items = $conn->query("SELECT * FROM merchandise ORDER BY id DESC")->fetch
         $('#merchTable').DataTable({
             "language": {
                 "search": "Cari Produk:",
-                "lengthMenu": "Tampilkan _MENU_ item",
+                "lengthMenu": "Show  _MENU_ item",
                 "zeroRecords": "Data merchandise tidak ditemukan",
                 "info": "Halaman _PAGE_ dari _PAGES_",
                 "infoEmpty": "Tidak ada data",
