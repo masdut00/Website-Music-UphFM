@@ -88,9 +88,12 @@ $faqs = $conn->query("SELECT * FROM faq ORDER BY id ASC")->fetch_all(MYSQLI_ASSO
             <p>UPFM hadir sebagai platform festival musik digital yang menyatukan berbagai genre dalam satu ruang, memberikan informasi lengkap seputar lineup, jadwal, dan aktivitas acara secara real-time.</p>
             <p>Kami bertujuan memudahkan generasi Z dalam merencanakan pengalaman menonton musisi favorit mereka sekaligus mendukung ekosistem musik lokal.</p>
         </div>
-        <div class="intro-image">
-            <div class="image-placeholder-large" style="background-color: #ddd;">
-                </div>
+        <div class="intro-image" style="height: 100%;">
+            <div class="image-placeholder-large" style="background-color: #ddd; width: 70%; height: 70%;">
+                <img src="assets/images/about.png" 
+                    alt="UPH Festival Music" 
+                    style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            </div>
         </div>
     </section>
 

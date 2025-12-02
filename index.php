@@ -9,10 +9,10 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
 ?>
 
 <style>
-    /* --- HERO SECTION --- */
+/* --- HERO SECTION --- */
     .hero {
         height: 90vh;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('assets/images/hero-bg.jpg');
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('assets/images/banner.png');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -22,22 +22,29 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
         text-align: center;
         color: white;
     }
-    .hero h1 { font-size: 4rem; margin-bottom: 10px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-    .hero p { font-size: 1.3rem; margin-bottom: 40px; font-weight: 300; letter-spacing: 1px; color: #f0f0f0; }
-    
+    .hero h1 { 
+        font-size: 4rem; margin-bottom: 10px; font-weight: 900; 
+        letter-spacing: 3px; text-transform: uppercase; 
+        text-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+    }
+    .hero p { 
+        font-size: 1.3rem; margin-bottom: 40px; font-weight: 300; 
+        letter-spacing: 1px; color: #f0f0f0; 
+    }
+
     .hero-btn {
         padding: 15px 40px;
-        background-color: #e74c3c;
+        background-color: var(--primary-color);
         color: white;
         text-decoration: none;
         font-weight: bold;
         font-size: 1.1rem;
         border-radius: 50px;
         transition: 0.3s;
-        border: 2px solid #e74c3c;
+        border: 2px solid var(--primary-color);
         display: inline-block;
     }
-    .hero-btn:hover { background-color: transparent; color: #e74c3c; }
+    .hero-btn:hover { background-color: transparent; color: var(--primary-color); }
 
     /* --- GLOBAL SECTION --- */
     section { padding: 80px 0; }
@@ -55,10 +62,12 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
     .artist-highlight { background-color: #111; color: white; }
     .artist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .artist-card {
-        height: 400px; position: relative; overflow: hidden; border-radius: 10px; cursor: pointer;
+        height: 400px; position: relative; overflow: hidden; 
+        border-radius: 10px; cursor: pointer;
     }
     .artist-bg {
-        width: 100%; height: 100%; background-size: cover; background-position: center;
+        width: 100%; height: 100%; 
+        background-size: cover; background-position: center;
         transition: transform 0.5s ease;
     }
     .artist-overlay {
@@ -66,16 +75,16 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
         background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     }
     .artist-card:hover .artist-bg { transform: scale(1.1); }
-    
-    /* --- TICKET CTA BANNER (PENGGANTI KARTU) --- */
+
+    /* --- TICKET CTA BANNER --- */
     .ticket-cta {
-        background-color: #e74c3c; /* Warna Merah Brand */
+        background-color: var(--primary-color); 
         color: white;
         text-align: center;
         padding: 80px 0;
     }
     .btn-white {
-        background: white; color: #e74c3c; padding: 15px 40px; 
+        background: white; color: var(--primary-color); padding: 15px 40px; 
         font-weight: bold; font-size: 1.2rem; border-radius: 50px; 
         text-decoration: none; transition: 0.3s; display: inline-block;
         margin-top: 20px;
@@ -92,7 +101,8 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
 
     /* --- SPONSOR --- */
     .sponsor-logo-home {
-        height: 50px; object-fit: contain; filter: grayscale(100%); opacity: 0.5; transition: 0.3s;
+        height: 50px; object-fit: contain; filter: grayscale(100%); 
+        opacity: 0.5; transition: 0.3s;
     }
     .sponsor-logo-home:hover { filter: grayscale(0%); opacity: 1; }
 
