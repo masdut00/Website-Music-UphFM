@@ -3,24 +3,19 @@ require_once 'includes/db.php';
 $page_title = 'Home - UPH Festival Music';
 require_once 'includes/header.php';
 
-// 1. Ambil Data Headliner (Artis Utama)
 $headliners = $conn->query("SELECT * FROM artists WHERE is_headliner = 1 ORDER BY name ASC LIMIT 3")->fetch_all(MYSQLI_ASSOC);
-
-// 2. Ambil Preview Galeri (Foto Terbaru)
 $gallery_preview = $conn->query("SELECT * FROM gallery WHERE media_type = 'photo' ORDER BY id DESC LIMIT 3")->fetch_all(MYSQLI_ASSOC);
-
-// 3. Ambil Data Sponsor
 $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <style>
     /* --- HERO SECTION --- */
     .hero {
-        height: 90vh; /* Tinggi layar penuh */
+        height: 90vh;
         background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('assets/images/hero-bg.jpg');
         background-size: cover;
         background-position: center;
-        background-attachment: fixed; /* Efek Parallax */
+        background-attachment: fixed;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -138,7 +133,7 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
         </div>
         
         <div style="text-align: center; margin-top: 40px;">
-            <a href="jadwal.php" style="color: white; text-decoration: underline; font-weight: bold;">Lihat Semua Artis & Jadwal &rarr;</a>
+            <a href="explore.php" style="color: white; text-decoration: underline; font-weight: bold;">Lihat Semua Artis & Jadwal &rarr;</a>
         </div>
     </div>
 </section>
