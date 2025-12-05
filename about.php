@@ -9,75 +9,11 @@ $faqs = $conn->query("SELECT * FROM faq ORDER BY id ASC")->fetch_all(MYSQLI_ASSO
 ?>
 
 <style>
-    /* Styling Accordion FAQ agar serasi dengan About */
-    .faq-section {
-        margin-top: 60px;
-        margin-bottom: 60px;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    .faq-item {
-        background: #fff;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #eee;
-        overflow: hidden;
-    }
 
-    .faq-question {
-        background: #fff;
-        padding: 15px 20px;
-        width: 100%;
-        text-align: left;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #333;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: background 0.3s;
-    }
-
-    .faq-question:hover {
-        background-color: #f8f9fa;
-        color: #007bff;
-    }
-
-    .faq-question.active {
-        background-color: #f1f3f5;
-        color: #007bff;
-    }
-
-    .faq-icon {
-        transition: transform 0.3s ease;
-        font-size: 0.8rem;
-        color: #999;
-    }
-    
-    .faq-question.active .faq-icon {
-        transform: rotate(180deg);
-        color: #007bff;
-    }
-
-    .faq-answer {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease-out;
-        background-color: #fff;
-    }
-
-    .faq-answer p {
-        padding: 20px;
-        margin: 0;
-        color: #666;
-        line-height: 1.6;
-        font-size: 0.95rem;
-        border-top: 1px solid #f1f1f1;
-    }
+@media (max-width: 768px) {
+    .about-intro { flex-direction: column-reverse; } /* Gambar di atas teks di HP */
+    .intro-image { width: 100%; }
+}
 </style>
 
 <div class="container page-container">

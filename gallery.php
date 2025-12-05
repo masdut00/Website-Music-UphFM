@@ -3,23 +3,18 @@ require_once 'includes/db.php';
 $page_title = 'Galeri Festival';
 require_once 'includes/header.php';
 
-// 1. Ambil Highlight
 $slider_items = $conn->query("SELECT * FROM gallery WHERE is_highlight = 1 ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
-
-// 2. Ambil SEMUA untuk album
 $gallery_items = $conn->query("SELECT * FROM gallery ORDER BY album_name ASC, id DESC")->fetch_all(MYSQLI_ASSOC);
 
-// 3. Kelompokkan array berdasarkan nama album
 $grouped_albums = [];
 foreach ($gallery_items as $item) {
-    // Pastikan jika album_name kosong, masuk ke 'Lainnya' atau 'General'
     $album_key = !empty($item['album_name']) ? $item['album_name'] : 'General';
     $grouped_albums[$album_key][] = $item;
 }
 ?>  <div class="gallery-page">
-    <div class="gallery-banner">
+    <!-- <div class="gallery-banner">
         <h2>Banner UPH Music</h2>
-    </div>
+    </div> -->
 
     <section class="slider-container">
         <h2 class="section-title-explore">HIGHLIGHT MOMENTS</h2>

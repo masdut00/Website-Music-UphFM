@@ -39,11 +39,11 @@ $current_page = basename($_SERVER['SCRIPT_NAME']);
             <ul id="primary-navigation" data-visible="false">
                 
                 <li><a href="/upfm_web/index.php" class="<?php echo ($current_page == 'index.php') ? 'active' : ''; ?>">HOME</a></li>
-                <li><a href="/upfm_web/about.php" class="<?php echo ($current_page == 'about.php') ? 'active' : ''; ?>">ABOUT</a></li>
                 <li><a href="/upfm_web/explore.php" class="<?php echo ($current_page == 'explore.php') ? 'active' : ''; ?>">EXPLORE</a></li>
                 <li><a href="/upfm_web/schedule.php" class="<?php echo ($current_page == 'schedule.php') ? 'active' : ''; ?>">JADWAL</a></li>
                 <li><a href="/upfm_web/journal.php" class="<?php echo ($current_page == 'journal.php' || $current_page == 'baca_artikel.php') ? 'active' : ''; ?>">JOURNAL</a></li>
                 <li><a href="/upfm_web/gallery.php" class="<?php echo ($current_page == 'gallery.php') ? 'active' : ''; ?>">GALLERY</a></li>
+                <li><a href="/upfm_web/about.php" class="<?php echo ($current_page == 'about.php') ? 'active' : ''; ?>">ABOUT</a></li>
                 <li><a href="/upfm_web/get_involved.php" class="<?php echo ($current_page == 'get_involved.php' || $current_page == 'contact.php') ? 'active' : ''; ?>">JOIN US</a></li>
 
                 <?php if (isset($_SESSION['user_id'])): ?>

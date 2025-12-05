@@ -12,7 +12,7 @@ $sponsors = $conn->query("SELECT * FROM sponsors LIMIT 6")->fetch_all(MYSQLI_ASS
 /* --- HERO SECTION --- */
     .hero {
         height: 90vh;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('assets/images/banner.png');
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('assets/images/banner2.png');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;

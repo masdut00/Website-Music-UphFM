@@ -3,10 +3,8 @@ require_once 'includes/db.php';
 $page_title = 'Jelajahi Festival - Tiket & Merch';
 require_once 'includes/header.php';
 
-// --- LOGIKA FILTER ---
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
-// --- QUERY TIKET ---
 $sql_tickets = "SELECT t.*, 
                 (SELECT image_url FROM ticket_images WHERE ticket_id = t.id ORDER BY id LIMIT 1) AS image_url
                 FROM tickets t 
@@ -23,7 +21,6 @@ if ($filter === 'presale') {
 $sql_tickets .= " ORDER BY t.price ASC";
 $tickets = $conn->query($sql_tickets)->fetch_all(MYSQLI_ASSOC);
 
-// --- QUERY MERCHANDISE ---
 $sql_merch = "SELECT * FROM merchandise WHERE stock > 0 ORDER BY id DESC";
 $merch_items = $conn->query($sql_merch)->fetch_all(MYSQLI_ASSOC);
 ?>
@@ -91,23 +88,26 @@ $merch_items = $conn->query($sql_merch)->fetch_all(MYSQLI_ASSOC);
 
     <section class="explore-section">
         <h2 class="section-title-explore">OFFICIAL MERCH</h2>
+        
         <div class="product-grid">
             <?php if (!empty($merch_items)): ?>
                 <?php foreach ($merch_items as $item): ?>
                     <div class="product-card">
-                        <div class="product-image" style="background-image: url('assets/images/merch/<?php echo htmlspecialchars($item['image_url'] ?: 'default_merch.jpg'); ?>'); background-size: contain; background-color: #f8f8f8;"></div>
+                        <div class="product-image merch-style" 
+                             style="background-image: url('assets/images/merch/<?php echo htmlspecialchars($item['image_url'] ?: 'default_merch.jpg'); ?>');">
+                        </div>
                         
                         <div class="product-info">
                             <span class="product-category"><?php echo htmlspecialchars($item['item_name']); ?></span>
                             <p class="product-price">Rp <?php echo number_format($item['price'], 0, ',', '.'); ?></p>
                         </div>
                         
-                        <a href="account/beli_merch.php?id=<?php echo $item['id']; ?>" class="btn-buy" style="background-color: #555;">Lihat Detail</a>
+                        <a href="account/beli_merch.php?id=<?php echo $item['id']; ?>" class="btn-buy" style="background-color: #333;">Lihat Detail</a>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div style="grid-column: 1/-1; text-align: center; color: #777;">
-                    <p>Merchandise belum tersedia.</p>
+                <div style="grid-column: 1/-1; text-align: center; color: #777; padding: 40px;">
+                    <p>Merchandise belum tersedia. Stay tuned!</p>
                 </div>
             <?php endif; ?>
         </div>

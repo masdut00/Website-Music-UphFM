@@ -434,139 +434,121 @@ ul#primary-navigation {
     margin-bottom: 3rem;
 }
 
-/* --- About Page --- */
-
-/* FAQ Accordion (Tambahan Baru) */
-.faq-section {
-    margin-top: 60px;
-    margin-bottom: 60px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.faq-item {
-    background: #fff;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #eee;
-    overflow: hidden;
-}
-.faq-question {
-    background: #fff;
-    padding: 15px 20px;
-    width: 100%;
-    text-align: left;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--dark-color);
+/* Page About */
+.about-intro {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    transition: background 0.3s;
+    gap: 40px;
+    margin-bottom: 80px;
+    flex-wrap: wrap;
 }
-.faq-question:hover {
-    background-color: var(--light-gray);
-    color: var(--primary-color);
+.intro-text { flex: 1; }
+.intro-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--dark-color); }
+.intro-text p { font-size: 1.1rem; line-height: 1.8; color: #555; }
+.intro-image { flex: 1; }
+.intro-image img { width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.our-team { margin-bottom: 80px; text-align: center; }
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Otomatis menyesuaikan */
+    gap: 30px;
+    justify-content: center;
 }
-.faq-question.active {
-    background-color: #f1f3f5;
-    color: var(--primary-color);
-}
-.faq-icon {
+
+.team-member {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
-    font-size: 0.8rem;
-    color: #999;
+    border: 1px solid #eee;
+    text-align: center;
 }
-.faq-question.active .faq-icon {
-    transform: rotate(180deg);
+.team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.team-photo img {
+    width: 130px; height: 130px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 4px solid #f8f9fa;
+}
+
+.team-member h4 {
+    margin: 10px 0 5px;
+    font-size: 1.2rem;
+    color: var(--dark-color);
+    font-weight: 700;
+}
+.team-member span {
+    display: block;
     color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
 }
+
+.sponsor-grid {
+    display: flex; flex-wrap: wrap; justify-content: center; 
+    gap: 40px; margin-bottom: 80px; align-items: center;
+}
+.sponsor-logo img {
+    height: 60px; object-fit: contain; 
+    /* filter: grayscale(100%); opacity: 0.6; transition: 0.3s; */
+}
+.sponsor-logo img:hover { filter: grayscale(0%); opacity: 1; }
+
+.faq-section { max-width: 800px; margin: 0 auto 80px auto; }
+
+.faq-item {
+    border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px;
+    overflow: hidden; background: white;
+}
+
+.faq-question {
+    width: 100%; text-align: left; padding: 18px 25px;
+    background: white; border: none; cursor: pointer;
+    font-size: 1.05rem; font-weight: 600; color: #333;
+    display: flex; justify-content: space-between; align-items: center;
+    transition: 0.3s;
+    position: relative;
+}
+
+.faq-question::after, 
+.faq-question::before {
+    content: none !important;
+    display: none !important;
+}
+
+.faq-question:hover { background-color: #f8f9fa; color: var(--primary-color); }
+.faq-question.active { background-color: #f1f3f5; color: var(--primary-color); }
+
+.faq-icon { 
+    transition: transform 0.3s; 
+    color: #999; 
+    font-size: 0.9rem;
+}
+.faq-question.active .faq-icon { 
+    transform: rotate(180deg); 
+    color: var(--primary-color); 
+}
+
 .faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
+    max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
     background-color: #fff;
 }
 .faq-answer p {
-    padding: 20px;
-    margin: 0;
-    color: var(--text-color);
-    line-height: 1.6;
-    font-size: 0.95rem;
+    padding: 20px 25px; margin: 0; color: #666; line-height: 1.6;
     border-top: 1px solid #f1f1f1;
 }
-.section-title {
-    text-align: center;
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    color: var(--dark-color);
+
+@media (max-width: 768px) {
+    .about-intro { flex-direction: column-reverse; }
+    .intro-image { width: 100%; }
 }
-.about-intro {
-    display: flex;
-    gap: 3rem;
-    align-items: flex-start;
-    margin-bottom: 5rem;
-}
-.intro-text {
-    flex-basis: 50%;
-}
-.intro-text h2 {
-    margin-top: 0;
-    border-left: 4px solid var(--dark-color);
-    padding-left: 1rem;
-    font-size: 1.3rem;
-}
-.intro-text p {
-    color: var(--text-color);
-    font-weight: normal;
-}
-.intro-image {
-    flex-basis: 50%;
-}
-.image-placeholder-large {
-    height: 350px;
-    background-color: var(--placeholder-gray);
-}
-.our-team {
-    margin-bottom: 5rem;
-}
-.team-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-}
-.team-member {
-    background-color: var(--placeholder-gray);
-    padding: 10px 25px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: var(--text-color);
-}
-.sponsors {
-    margin-bottom: 5rem;
-}
-.sponsor-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 20px;
-}
-.sponsor-logo {
-    /* HAPUS background-color */
-    background-color: transparent; 
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-}
-.sponsor-logo img {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    mix-blend-mode: multiply; /* Trik agar background putih logo hilang */}
 
 /* --- Explore Page --- */
 .explore-section {
